@@ -3,20 +3,25 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Trusted IMEI Check API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: orders
+    description: Order management
+  - name: stripe
+    description: Stripe payment operations
+  - name: admin
+    description: Admin operations
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +29,393 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /orders:
+    post:
+      operationId: createOrder
+      tags: [orders]
+      summary: Create a new order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrderBody"
+      responses:
+        "201":
+          description: Order created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderSummary"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "429":
+          description: Rate limited
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /orders/{orderId}:
+    get:
+      operationId: getOrder
+      tags: [orders]
+      summary: Get order status
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Order found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderSummary"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /orders/{orderId}/checkout:
+    post:
+      operationId: createCheckoutSession
+      tags: [orders, stripe]
+      summary: Create Stripe Checkout session for an order
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Checkout session created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckoutSessionResponse"
+        "400":
+          description: Order not eligible for checkout
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "404":
+          description: Order not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /orders/{orderId}/results:
+    get:
+      operationId: getOrderResults
+      tags: [orders]
+      summary: Get order results (after payment)
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Results available
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderResults"
+        "402":
+          description: Payment required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "404":
+          description: Order not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /stripe/webhook:
+    post:
+      operationId: stripeWebhook
+      tags: [stripe]
+      summary: Stripe webhook endpoint
+      responses:
+        "200":
+          description: Webhook processed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  received:
+                    type: boolean
+                required: [received]
+
+  /stripe/publishable-key:
+    get:
+      operationId: getStripePublishableKey
+      tags: [stripe]
+      summary: Get Stripe publishable key
+      responses:
+        "200":
+          description: Publishable key
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StripePublishableKeyResponse"
+
+  /admin/login:
+    post:
+      operationId: adminLogin
+      tags: [admin]
+      summary: Admin login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminLoginBody"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminLoginResponse"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /admin/logout:
+    post:
+      operationId: adminLogout
+      tags: [admin]
+      summary: Admin logout
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                required: [success]
+
+  /admin/me:
+    get:
+      operationId: getAdminMe
+      tags: [admin]
+      summary: Get current admin session
+      responses:
+        "200":
+          description: Admin session info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminLoginResponse"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /admin/orders:
+    get:
+      operationId: listAdminOrders
+      tags: [admin]
+      summary: List orders for admin
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: paymentStatus
+          in: query
+          schema:
+            type: string
+            enum: [pending, paid, failed, refunded]
+        - name: checkStatus
+          in: query
+          schema:
+            type: string
+            enum: [pending, in_progress, completed, failed]
+      responses:
+        "200":
+          description: Orders list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminOrdersListResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /admin/orders/{orderId}:
+    get:
+      operationId: getAdminOrder
+      tags: [admin]
+      summary: Get full order details (admin)
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Full order details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminOrderDetail"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /admin/orders/{orderId}/resend-email:
+    post:
+      operationId: adminResendEmail
+      tags: [admin]
+      summary: Resend result email to customer
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Email sent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                required: [success]
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /admin/orders/{orderId}/mark-refund-review:
+    post:
+      operationId: adminMarkRefundReview
+      tags: [admin]
+      summary: Mark order for refund review
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Marked
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                required: [success]
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /admin/stats:
+    get:
+      operationId: getAdminStats
+      tags: [admin]
+      summary: Get admin dashboard stats
+      responses:
+        "200":
+          description: Stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminStats"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /admin/audit-logs/{orderId}:
+    get:
+      operationId: getAuditLogs
+      tags: [admin]
+      summary: Get audit log for an order
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Audit logs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuditLogsResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
 components:
   schemas:
     HealthStatus:
@@ -31,6 +423,303 @@ components:
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
 
+    ApiError:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+      required: [error, message]
+
+    CreateOrderBody:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        identifier:
+          type: string
+        identifierType:
+          type: string
+          enum: [imei, serial]
+          default: imei
+      required: [email, identifier]
+
+    OrderSummary:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        identifierType:
+          type: string
+          enum: [imei, serial]
+        identifierMasked:
+          type: string
+        amount:
+          type: integer
+        currency:
+          type: string
+        paymentStatus:
+          type: string
+          enum: [pending, paid, failed, refunded]
+        checkStatus:
+          type: string
+          enum: [pending, in_progress, completed, failed]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required: [id, email, identifierType, identifierMasked, amount, currency, paymentStatus, checkStatus, createdAt, updatedAt]
+
+    CheckoutSessionResponse:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        url:
+          type: string
+      required: [sessionId, url]
+
+    StripePublishableKeyResponse:
+      type: object
+      properties:
+        publishableKey:
+          type: string
+      required: [publishableKey]
+
+    DeviceCheckField:
+      type: object
+      properties:
+        value:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [clear, blacklisted, on, off, unavailable, error]
+          nullable: true
+        label:
+          type: string
+      required: [label]
+
+    OrderResults:
+      type: object
+      properties:
+        orderId:
+          type: string
+        checkedAt:
+          type: string
+          format: date-time
+          nullable: true
+        identifierType:
+          type: string
+          enum: [imei, serial]
+        identifierMasked:
+          type: string
+        providerName:
+          type: string
+          nullable: true
+        brand:
+          type: string
+          nullable: true
+        model:
+          type: string
+          nullable: true
+        manufacturer:
+          type: string
+          nullable: true
+        blacklistStatus:
+          type: string
+          enum: [clear, blacklisted, unavailable, error]
+          nullable: true
+        activationLockStatus:
+          type: string
+          enum: [on, off, unavailable, error]
+          nullable: true
+        findMyStatus:
+          type: string
+          enum: [on, off, unavailable, error]
+          nullable: true
+        providerCoverageNotes:
+          type: string
+          nullable: true
+        checkStatus:
+          type: string
+          enum: [pending, in_progress, completed, failed]
+        paymentStatus:
+          type: string
+          enum: [pending, paid, failed, refunded]
+      required: [orderId, identifierType, identifierMasked, checkStatus, paymentStatus]
+
+    AdminLoginBody:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+      required: [email, password]
+
+    AdminLoginResponse:
+      type: object
+      properties:
+        email:
+          type: string
+        authenticated:
+          type: boolean
+      required: [email, authenticated]
+
+    AdminOrderSummary:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        identifierType:
+          type: string
+          enum: [imei, serial]
+        identifierMasked:
+          type: string
+        amount:
+          type: integer
+        currency:
+          type: string
+        paymentStatus:
+          type: string
+          enum: [pending, paid, failed, refunded]
+        checkStatus:
+          type: string
+          enum: [pending, in_progress, completed, failed]
+        blacklistStatus:
+          type: string
+          enum: [clear, blacklisted, unavailable, error]
+          nullable: true
+        providerName:
+          type: string
+          nullable: true
+        refundReview:
+          type: boolean
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required: [id, email, identifierType, identifierMasked, amount, currency, paymentStatus, checkStatus, createdAt, updatedAt]
+
+    AdminOrdersListResponse:
+      type: object
+      properties:
+        orders:
+          type: array
+          items:
+            $ref: "#/components/schemas/AdminOrderSummary"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+      required: [orders, total, page, limit]
+
+    AdminOrderDetail:
+      allOf:
+        - $ref: "#/components/schemas/AdminOrderSummary"
+        - type: object
+          properties:
+            activationLockStatus:
+              type: string
+              enum: [on, off, unavailable, error]
+              nullable: true
+            findMyStatus:
+              type: string
+              enum: [on, off, unavailable, error]
+              nullable: true
+            providerCoverageNotes:
+              type: string
+              nullable: true
+            stripeCheckoutSessionId:
+              type: string
+              nullable: true
+            stripePaymentIntentId:
+              type: string
+              nullable: true
+            brand:
+              type: string
+              nullable: true
+            model:
+              type: string
+              nullable: true
+            manufacturer:
+              type: string
+              nullable: true
+            checkedAt:
+              type: string
+              format: date-time
+              nullable: true
+
+    AdminStats:
+      type: object
+      properties:
+        totalOrders:
+          type: integer
+        paidOrders:
+          type: integer
+        completedChecks:
+          type: integer
+        failedChecks:
+          type: integer
+        pendingPayment:
+          type: integer
+        refundReview:
+          type: integer
+        revenueCAD:
+          type: number
+        ordersToday:
+          type: integer
+        ordersByStatus:
+          type: array
+          items:
+            type: object
+            properties:
+              status:
+                type: string
+              count:
+                type: integer
+            required: [status, count]
+      required: [totalOrders, paidOrders, completedChecks, failedChecks, pendingPayment, refundReview, revenueCAD, ordersToday, ordersByStatus]
+
+    AuditLog:
+      type: object
+      properties:
+        id:
+          type: string
+        orderId:
+          type: string
+          nullable: true
+        eventType:
+          type: string
+        eventPayload:
+          type: object
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, eventType, createdAt]
+
+    AuditLogsResponse:
+      type: object
+      properties:
+        logs:
+          type: array
+          items:
+            $ref: "#/components/schemas/AuditLog"
+      required: [logs]
