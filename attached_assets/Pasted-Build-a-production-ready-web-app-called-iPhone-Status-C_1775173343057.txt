@@ -1,0 +1,208 @@
+Build a production-ready web app called “iPhone Status Check Canada”.
+
+Purpose:
+A paid website where a customer enters their email first, then enters an IMEI or serial number, pays CAD $0.99, and receives the device-check results by email. The app must use an external provider integration patterned around imeiapi.org. The app must only show statuses that are actually returned by the configured provider. It must never guess, infer, scrape, or fabricate Apple-related statuses.
+
+Core business rules:
+- Charge exactly 0.99 CAD per order
+- Require customer email before allowing device identifier entry
+- Accept IMEI by default
+- Accept serial number only if provider support is enabled by environment variable
+- Run the provider lookup only after successful payment
+- Email the results to the customer after payment succeeds
+- If a field is not returned by the provider, show “Unavailable from provider”
+- Add clear notices:
+  - “We return results only from authorized data sources.”
+  - “Blacklist coverage depends on the provider and region.”
+  - “Some checks may be unavailable depending on provider support.”
+  - “Apple-related statuses are shown only when returned by the configured provider and are not inferred.”
+
+Stack:
+- Next.js with TypeScript
+- PostgreSQL with Prisma
+- Stripe Checkout for one-time payment
+- Stripe webhook handling
+- SendGrid for transactional email
+- Zod validation
+- Rate limiting
+- Basic admin dashboard
+- Clean responsive mobile-first design
+- Secure environment-variable configuration
+
+Pages:
+- Home page with explanation and CTA
+- Order page
+- Checkout success page
+- Checkout cancel page
+- Results page by order ID
+- Terms page
+- Privacy page
+- Refunds page
+- Contact/support page
+- Admin page
+
+User flow:
+1. User lands on homepage
+2. User clicks start
+3. User enters email address
+4. User enters IMEI or serial number
+5. User sees price of CAD $0.99
+6. User is sent to Stripe Checkout
+7. Stripe payment completes
+8. Stripe webhook marks order paid
+9. App calls provider adapter
+10. App stores normalized results and encrypted raw provider response
+11. App emails results to user
+12. User sees success screen telling them results were emailed
+
+Provider behavior:
+- Primary provider integration should be implemented as a configurable adapter based on imeiapi.org request/response flow
+- Use environment variables for provider base URL and API key
+- Build the provider layer so other providers can be added later
+- Do not assume the provider always returns activation lock, find my, or blacklist data
+- Only map fields that are actually present
+- Missing fields must become “unavailable”
+- Preserve source/provider name in the results
+- Log provider errors cleanly
+- Retry safe transient failures once or twice
+- Never make unsupported claims about Apple-authoritative results
+
+Normalized result model:
+- providerName
+- checkedAt
+- identifierType
+- identifierMasked
+- brand
+- model
+- manufacturer
+- imei
+- serial
+- blacklistStatus = clear | blacklisted | unavailable | error
+- activationLockStatus = on | off | unavailable | error
+- findMyStatus = on | off | unavailable | error
+- providerCoverageNotes
+- rawProviderResponseEncrypted
+
+Database models:
+Order:
+- id
+- email
+- identifierType
+- identifierEncrypted
+- identifierMasked
+- amount
+- currency
+- paymentStatus
+- checkStatus
+- providerName
+- blacklistStatus
+- activationLockStatus
+- findMyStatus
+- providerCoverageNotes
+- rawProviderResponseEncrypted
+- stripeCheckoutSessionId
+- stripePaymentIntentId
+- createdAt
+- updatedAt
+
+AdminUser:
+- id
+- email
+- createdAt
+
+AuditLog:
+- id
+- orderId
+- eventType
+- eventPayload
+- createdAt
+
+Validation:
+- Validate email
+- Validate IMEI format and checksum
+- Validate serial format if serial support is enabled
+- Reject malformed input
+- Add server-side rate limiting by IP and email
+- Add bot/spam protection measures
+
+Stripe requirements:
+- Use Stripe Checkout
+- Currency is CAD
+- Price is 0.99
+- Use environment variables for secret key, publishable key, webhook secret, and price ID or dynamically create checkout sessions
+- Include success and cancel URLs based on APP_BASE_URL
+- Add webhook endpoint at /api/stripe/webhook
+- Verify Stripe signatures
+- Use idempotency to prevent duplicate order processing
+
+Email requirements:
+- Send result email after successful payment and provider lookup
+- Send via SendGrid
+- Email subject: “Your device check results”
+- Email body should include:
+  - order ID
+  - date/time
+  - masked identifier
+  - provider name
+  - returned result fields
+  - clear “Unavailable from provider” labels where applicable
+  - disclaimer that unavailable fields were not inferred
+  - support contact details
+
+Admin dashboard:
+- Secure admin login
+- Search orders by email, order ID, IMEI last digits, or status
+- View payment state
+- View check state
+- Re-send result email
+- Mark refund-review
+- View provider errors and audit history
+- Never expose full raw identifiers in plain text on screen
+
+Legal/disclaimer content:
+- Terms of service
+- Privacy policy
+- Refund policy
+- Disclaimer that device-check coverage depends on configured providers and returned fields
+- Disclaimer that Apple-related statuses are not inferred
+
+UI/copy:
+- Minimal, clean, trustworthy
+- Mobile-first
+- Home page headline: “Fast iPhone IMEI Check”
+- Subheadline: “Pay $0.99 CAD to receive available device-check results by email.”
+- Show the exact notices listed above on the order page and near the results section
+- Do not say the service can always determine activation lock, find my, or blacklist status
+
+Environment variables:
+- APP_BASE_URL
+- DATABASE_URL
+- STRIPE_SECRET_KEY
+- STRIPE_PUBLISHABLE_KEY
+- STRIPE_WEBHOOK_SECRET
+- STRIPE_PRICE_ID
+- SENDGRID_API_KEY
+- FROM_EMAIL
+- SUPPORT_EMAIL
+- PROVIDER_NAME
+- IMEIAPI_BASE_URL
+- IMEIAPI_KEY
+- IMEIAPI_SUPPORTS_SERIAL=false
+- ADMIN_EMAIL
+- ADMIN_PASSWORD or secure auth configuration
+
+Developer requirements:
+- Include README with setup steps
+- Include notes on how to configure Stripe webhook using APP_BASE_URL + /api/stripe/webhook
+- Include notes on how to set success URL and cancel URL using APP_BASE_URL
+- Include mock provider mode for testing
+- Include seed data
+- Include unit tests for validation and mapping
+- Include webhook test instructions
+- Include graceful handling for provider downtime
+- Make the app easy to deploy in Replit
+
+Important behavior:
+- The app should be fully functional even when some provider fields are unavailable
+- Unsupported checks must render as unavailable, not failed unless there is a real error
+- The app must not promise more than the provider actually returns
