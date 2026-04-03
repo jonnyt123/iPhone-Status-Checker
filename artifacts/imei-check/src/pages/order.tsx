@@ -3,10 +3,11 @@ import { Layout } from "@/components/layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { ShieldCheck, AlertCircle, CheckCircle2, ChevronRight, Loader2 } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { ShieldCheck, AlertCircle, CheckCircle2, ChevronRight, Loader2, ArrowLeft, Info } from "lucide-react";
 import { useCreateOrder, useCreateCheckoutSession } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function Order() {
   const [step, setStep] = useState(1);
@@ -52,101 +53,170 @@ export default function Order() {
 
   return (
     <Layout>
-      <div className="max-w-2xl mx-auto py-8">
-        <div className="mb-8 flex items-center justify-between text-sm font-medium text-muted-foreground relative">
-          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-0.5 bg-border -z-10" />
+      <div className="max-w-md mx-auto py-12 px-4">
+        
+        {/* Progress Indicator */}
+        <div className="mb-10 flex items-center justify-between relative px-2">
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-border rounded-full -z-10" />
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-primary rounded-full -z-10 transition-all duration-500" style={{ width: `${((step - 1) / 2) * 100}%` }} />
+          
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className={`w-8 h-8 rounded-full flex items-center justify-center border-2 bg-card ${
-                step >= i ? "border-primary text-primary" : "border-border"
-              } ${step === i ? "ring-4 ring-primary/20" : ""}`}
+              className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-300 ${
+                step >= i ? "bg-primary text-primary-foreground shadow-md" : "bg-card border-2 border-border text-muted-foreground"
+              } ${step === i ? "ring-4 ring-primary/20 scale-110" : ""}`}
             >
               {i}
             </div>
           ))}
         </div>
 
-        <Card className="shadow-lg">
-          <CardHeader>
-            <CardTitle>
-              {step === 1 && "Contact Information"}
-              {step === 2 && "Device Identifier"}
-              {step === 3 && "Payment & Confirmation"}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {step === 1 && (
-              <form id="step1-form" onSubmit={handleNext} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email Address</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Results will be sent here"
-                    data-testid="input-order-email"
-                  />
-                  <p className="text-sm text-muted-foreground">We never send spam.</p>
-                </div>
-              </form>
-            )}
+        <Card className="rounded-[2rem] border shadow-xl bg-card overflow-hidden">
+          <div className="bg-muted/30 px-8 py-6 border-b">
+            <h2 className="text-2xl font-bold text-center tracking-tight">
+              {step === 1 && "Where should we send it?"}
+              {step === 2 && "What's the device ID?"}
+              {step === 3 && "Confirm & Pay"}
+            </h2>
+          </div>
+          
+          <CardContent className="p-8">
+            <AnimatePresence mode="wait">
+              {step === 1 && (
+                <motion.form 
+                  key="step1"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3 }}
+                  id="step1-form" 
+                  onSubmit={handleNext} 
+                  className="space-y-6"
+                >
+                  <div className="space-y-3">
+                    <Label htmlFor="email" className="text-muted-foreground ml-1">Email Address</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="name@example.com"
+                      className="h-14 rounded-2xl px-4 text-lg bg-background border-border focus-visible:ring-primary"
+                      data-testid="input-order-email"
+                      autoFocus
+                    />
+                    <p className="text-sm text-muted-foreground ml-1 flex items-center gap-1.5">
+                      <Info className="w-4 h-4" /> Secure delivery. No spam.
+                    </p>
+                  </div>
+                </motion.form>
+              )}
 
-            {step === 2 && (
-              <form id="step2-form" onSubmit={handleNext} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="identifier">IMEI or Serial Number</Label>
-                  <Input
-                    id="identifier"
-                    type="text"
-                    required
-                    value={identifier}
-                    onChange={(e) => setIdentifier(e.target.value)}
-                    placeholder="Enter 15-digit IMEI or Serial"
-                    data-testid="input-order-identifier"
-                  />
-                  <p className="text-sm text-muted-foreground">Dial *#06# on your phone to find your IMEI.</p>
-                </div>
-              </form>
-            )}
+              {step === 2 && (
+                <motion.form 
+                  key="step2"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3 }}
+                  id="step2-form" 
+                  onSubmit={handleNext} 
+                  className="space-y-6"
+                >
+                  <div className="space-y-3">
+                    <Label htmlFor="identifier" className="text-muted-foreground ml-1">IMEI Number</Label>
+                    <Input
+                      id="identifier"
+                      type="text"
+                      required
+                      value={identifier}
+                      onChange={(e) => setIdentifier(e.target.value)}
+                      placeholder="15-digit IMEI"
+                      className="h-14 rounded-2xl px-4 text-lg font-mono bg-background border-border focus-visible:ring-primary"
+                      data-testid="input-order-identifier"
+                      autoFocus
+                    />
+                    <div className="bg-muted p-4 rounded-2xl text-sm text-muted-foreground">
+                      <p className="font-medium text-foreground mb-1">How to find it:</p>
+                      <ul className="list-disc pl-4 space-y-1">
+                        <li>Settings → General → About</li>
+                        <li>Dial <span className="font-mono text-foreground font-medium">*#06#</span> on the phone</li>
+                      </ul>
+                    </div>
+                  </div>
+                </motion.form>
+              )}
 
-            {step === 3 && (
-              <div className="space-y-6">
-                <div className="bg-muted p-4 rounded-lg flex justify-between items-center text-lg font-semibold">
-                  <span>Total Cost</span>
-                  <span>$0.99 CAD</span>
-                </div>
+              {step === 3 && (
+                <motion.div 
+                  key="step3"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="space-y-8"
+                >
+                  <div className="flex flex-col items-center justify-center py-4 border-b border-border border-dashed">
+                    <span className="text-sm font-medium text-muted-foreground mb-1">Total Due</span>
+                    <span className="text-5xl font-bold tracking-tighter">$0.99 <span className="text-xl font-medium text-muted-foreground">CAD</span></span>
+                  </div>
 
-                <div className="space-y-4 text-sm text-muted-foreground border p-4 rounded-lg">
-                  <h3 className="font-semibold text-foreground mb-2">Important Notices</h3>
-                  <div className="flex gap-2"><ShieldCheck className="w-4 h-4 shrink-0 text-primary" /><span data-testid="text-order-notice-auth">We return results only from authorized data sources.</span></div>
-                  <div className="flex gap-2"><AlertCircle className="w-4 h-4 shrink-0 text-primary" /><span data-testid="text-order-notice-coverage">Blacklist coverage depends on the provider and region.</span></div>
-                  <div className="flex gap-2"><AlertCircle className="w-4 h-4 shrink-0 text-primary" /><span data-testid="text-order-notice-unavail">Some checks may be unavailable depending on provider support.</span></div>
-                  <div className="flex gap-2"><CheckCircle2 className="w-4 h-4 shrink-0 text-primary" /><span data-testid="text-order-notice-apple">Apple-related statuses are shown only when returned by the configured provider and are not inferred.</span></div>
-                </div>
-              </div>
-            )}
+                  <div className="bg-background border rounded-2xl p-5 space-y-4 shadow-sm">
+                    <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">Included</h3>
+                    <ul className="space-y-3 text-sm">
+                      <li className="flex items-center gap-3 font-medium"><CheckCircle2 className="w-5 h-5 text-success" /> Email Delivery</li>
+                      <li className="flex items-center gap-3 font-medium"><CheckCircle2 className="w-5 h-5 text-success" /> Blacklist Check</li>
+                    </ul>
+                  </div>
+
+                  <div className="space-y-3 text-xs text-muted-foreground bg-muted p-4 rounded-2xl">
+                    <div className="flex gap-2"><ShieldCheck className="w-4 h-4 shrink-0 text-foreground" /><span data-testid="text-order-notice-auth">Authorized data sources only.</span></div>
+                    <div className="flex gap-2"><AlertCircle className="w-4 h-4 shrink-0 text-foreground" /><span data-testid="text-order-notice-coverage">Coverage depends on provider and region.</span></div>
+                    <div className="flex gap-2"><AlertCircle className="w-4 h-4 shrink-0 text-foreground" /><span data-testid="text-order-notice-unavail">Some checks may be unavailable.</span></div>
+                    <div className="flex gap-2"><CheckCircle2 className="w-4 h-4 shrink-0 text-foreground" /><span data-testid="text-order-notice-apple">Apple statuses are not inferred.</span></div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <div className="mt-8 flex gap-3 pt-6 border-t">
+              {step > 1 && (
+                <Button 
+                  variant="outline" 
+                  size="lg"
+                  className="rounded-2xl h-14 px-4 w-14 p-0 shrink-0 border-2" 
+                  onClick={() => setStep(step - 1)} 
+                  disabled={isPending} 
+                  data-testid="button-order-back"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                </Button>
+              )}
+              
+              {step < 3 ? (
+                <Button 
+                  form={`step${step}-form`} 
+                  type="submit" 
+                  size="lg"
+                  className="rounded-2xl h-14 flex-1 text-base font-semibold shadow-md hover:shadow-lg transition-all"
+                  data-testid="button-order-next"
+                >
+                  Continue <ChevronRight className="w-5 h-5 ml-1" />
+                </Button>
+              ) : (
+                <Button 
+                  onClick={handlePay} 
+                  disabled={isPending} 
+                  size="lg" 
+                  className="rounded-2xl h-14 flex-1 text-base font-semibold shadow-md hover:shadow-lg transition-all"
+                  data-testid="button-order-pay"
+                >
+                  {isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : "Pay Securely"}
+                </Button>
+              )}
+            </div>
           </CardContent>
-          <CardFooter className="flex justify-between border-t p-6">
-            {step > 1 ? (
-              <Button variant="outline" onClick={() => setStep(step - 1)} disabled={isPending} data-testid="button-order-back">
-                Back
-              </Button>
-            ) : <div />}
-            
-            {step < 3 ? (
-              <Button form={`step${step}-form`} type="submit" data-testid="button-order-next">
-                Next <ChevronRight className="w-4 h-4 ml-2" />
-              </Button>
-            ) : (
-              <Button onClick={handlePay} disabled={isPending} size="lg" data-testid="button-order-pay">
-                {isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                Pay $0.99 CAD
-              </Button>
-            )}
-          </CardFooter>
         </Card>
       </div>
     </Layout>

@@ -1,0 +1,120 @@
+Redesign the website UI to feel inspired by the Apple App Store and modern iOS product pages, while avoiding direct copying of Apple trademarks, logos, or protected branding.
+
+Design direction:
+- Premium, minimal, polished, modern
+- Clean white and very light gray backgrounds
+- Soft card surfaces with subtle borders and shadows
+- Large rounded corners throughout
+- Spacious layout with strong visual hierarchy
+- Smooth scrolling and subtle micro-interactions
+- Refined typography similar to a modern mobile product marketing page
+- Make the experience feel like a high-end consumer app, not a generic form website
+
+Color palette:
+- Primary background: white
+- Secondary background: very light gray
+- Text: near-black and medium gray
+- Accent color: iOS-style blue for primary actions
+- Success color: elegant green
+- Warning/error colors should be subtle, not harsh
+- Avoid loud gradients, neon colors, or dark hacker-style themes
+
+Overall layout:
+- Full-width premium landing page with centered content
+- Sticky top navigation with clean minimal links
+- Large hero section at the top
+- Stacked content sections like a polished SaaS/App Store landing page
+- Mobile-first layout that looks especially strong on iPhone screens
+- Use generous spacing and consistent section rhythm
+
+Hero section:
+- Large headline with premium Apple-like marketing tone
+- Short subheadline explaining the paid check clearly
+- A primary CTA button like “Start Check”
+- A secondary subtle button like “How It Works”
+- Add a polished product-preview style card or phone mockup showing a sample result screen
+- Include a trust/disclaimer strip below the hero with the required notices
+
+Component styling:
+- Buttons should feel like iOS/App Store buttons:
+  - rounded pill or rounded rectangle style
+  - smooth hover and press transitions
+  - bold but clean typography
+- Form fields should feel like premium iOS settings / payment forms:
+  - rounded
+  - spacious padding
+  - subtle borders
+  - strong focus states
+- Cards should feel like App Store editorial cards:
+  - rounded corners
+  - layered depth
+  - soft shadow
+  - clean section titles
+- Status badges should be elegant, readable, and color coded:
+  - green for clear/off
+  - gray for unavailable
+  - red for blacklisted/error
+- Tables should be avoided where possible; prefer cards and stacked rows
+
+Homepage sections:
+1. Hero section
+2. “How it works” section with 3 or 4 polished icon cards
+3. “What you receive” section with elegant status/result preview cards
+4. Pricing section showing CAD $0.99 clearly
+5. Trust/disclaimer section
+6. FAQ section
+7. Footer with legal and support links
+
+Order page:
+- Make the order flow feel like a premium checkout app
+- Use a centered card layout with progress steps:
+  1. Email
+  2. Device ID
+  3. Payment
+- Add subtle progress indicators
+- Keep distractions low
+- Show required notices in a clean, non-alarming style
+- Make the CTA button visually strong and premium
+
+Results page:
+- Make results feel like a polished device report
+- Use elegant stacked cards, not plain text blocks
+- Include:
+  - masked identifier
+  - provider name
+  - check timestamp
+  - result statuses
+  - provider notes
+- Present each status in its own clean card row with icon + label + status badge
+- Unavailable fields should look neutral and intentional, not broken
+- Add a small note that unavailable fields were not inferred
+
+Admin page:
+- Keep the admin interface clean and modern but more functional
+- Use dashboard cards, clean filters, and structured spacing
+- Still keep the same premium design language
+
+Motion and interaction:
+- Add subtle fade-ins, hover lifts, and soft transitions
+- Buttons and cards should animate lightly
+- Avoid flashy or excessive animation
+- Keep everything smooth and premium
+
+Typography:
+- Use a modern sans-serif system that feels close to iOS styling
+- Strong headline scale
+- Clear section headings
+- Comfortable line height
+- Clean numeric display for pricing and statuses
+
+Iconography:
+- Use simple elegant line icons
+- Keep icons consistent and minimal
+- Avoid cartoonish or overly bold icon sets
+
+Important constraints:
+- Do not copy the exact Apple App Store layout one-to-one
+- Do not use Apple logos, App Store logos, SF Symbols that require restricted use, or Apple trademarks in branding
+- Create an Apple-inspired premium aesthetic, not a clone
+- Preserve all existing business logic, payment flow, provider logic, and disclaimers
+- This is a visual redesign and UX polish, not a change to the app’s core behavior
