@@ -36,7 +36,7 @@ function buildEmailHtml(data: ResultEmailData): string {
 <html>
 <head><meta charset="utf-8"><title>Your device check results</title></head>
 <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333;">
-  <h1 style="font-size: 22px; color: #1a1a2e;">Trusted IMEI Check — Your Results</h1>
+  <h1 style="font-size: 22px; color: #1e3a5f;">Trusted IMEI Check — Your Results</h1>
   <p>Thank you for using Trusted IMEI Check. Here are the results of your device check.</p>
 
   <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
@@ -80,11 +80,14 @@ function buildEmailHtml(data: ResultEmailData): string {
       <td style="padding: 8px 12px; font-weight: bold; border: 1px solid #ddd;">Find My</td>
       <td style="padding: 8px 12px; border: 1px solid #ddd;">${formatStatus(data.findMyStatus)}</td>
     </tr>
-    ${data.providerCoverageNotes ? `
-    <tr style="background: #f5f5f5;">
+    ${
+      data.providerCoverageNotes
+        ? `<tr style="background: #f5f5f5;">
       <td style="padding: 8px 12px; font-weight: bold; border: 1px solid #ddd;">Provider Notes</td>
       <td style="padding: 8px 12px; border: 1px solid #ddd;">${data.providerCoverageNotes}</td>
-    </tr>` : ""}
+    </tr>`
+        : ""
+    }
   </table>
 
   <div style="background: #f0f4ff; padding: 15px; border-radius: 4px; margin: 20px 0; font-size: 13px; color: #555;">
@@ -98,33 +101,37 @@ function buildEmailHtml(data: ResultEmailData): string {
     </ul>
   </div>
 
-  <p>If you have questions about your results, please contact us at <a href="mailto:${supportEmail}">${supportEmail}</a>.</p>
+  <p>If you have questions, contact us at <a href="mailto:${supportEmail}">${supportEmail}</a>.</p>
   <p style="font-size: 12px; color: #999;">Trusted IMEI Check | Results are returned from authorized data sources only.</p>
 </body>
 </html>`;
 }
 
 export async function sendResultEmail(data: ResultEmailData): Promise<void> {
-  const apiKey = process.env.SENDGRID_API_KEY;
+  const apiKey = process.env.RESEND_API_KEY;
   const fromEmail = process.env.FROM_EMAIL;
 
   if (!apiKey || !fromEmail) {
-    logger.warn({ orderId: data.orderId }, "SendGrid not configured — skipping email");
+    logger.warn({ orderId: data.orderId }, "Resend not configured — skipping email send");
     return;
   }
 
   try {
-    const sgMail = await import("@sendgrid/mail");
-    sgMail.default.setApiKey(apiKey);
+    const { Resend } = await import("resend");
+    const resend = new Resend(apiKey);
 
-    await sgMail.default.send({
-      to: data.email,
+    const { error } = await resend.emails.send({
       from: fromEmail,
+      to: data.email,
       subject: "Your device check results",
       html: buildEmailHtml(data),
     });
 
-    logger.info({ orderId: data.orderId, email: data.email }, "Result email sent");
+    if (error) {
+      throw new Error(`Resend error: ${JSON.stringify(error)}`);
+    }
+
+    logger.info({ orderId: data.orderId, email: data.email }, "Result email sent via Resend");
   } catch (err) {
     logger.error({ err, orderId: data.orderId }, "Failed to send result email");
     throw err;
