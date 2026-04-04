@@ -2,7 +2,7 @@ import { useGetOrderResults, getGetOrderResultsQueryKey } from "@workspace/api-c
 import { useParams } from "wouter";
 import { Layout } from "@/components/layout";
 import { Card, CardContent } from "@/components/ui/card";
-import { ShieldCheck, AlertCircle, CheckCircle2, Loader2, Smartphone, FileText, Activity, Server, Hash, Check, X, Minus } from "lucide-react";
+import { ShieldCheck, AlertCircle, CheckCircle2, Loader2, Smartphone, FileText, Activity, Server, Hash, Check, X, Minus, Info } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function Results() {
