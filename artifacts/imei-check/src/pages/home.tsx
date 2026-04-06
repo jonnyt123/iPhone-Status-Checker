@@ -20,10 +20,10 @@ export default function Home() {
             className="space-y-6 max-w-4xl"
           >
             <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-foreground" data-testid="text-home-headline">
-              Know before you buy.
+              Fast iPhone IMEI Check
             </h1>
             <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto font-medium" data-testid="text-home-subheadline">
-              Instant, authoritative device checks. Protect yourself from blacklisted or activation-locked devices.
+              Pay $0.99 CAD to receive available device-check results by email.
             </p>
           </motion.div>
 
@@ -35,11 +35,11 @@ export default function Home() {
           >
             <Link href="/order" data-testid="link-home-cta">
               <Button size="lg" className="rounded-full px-8 h-14 text-lg shadow-md hover:shadow-lg transition-all active:scale-95">
-                Start Check - $0.99 CAD
+                Start Check
               </Button>
             </Link>
             <Button variant="outline" size="lg" className="rounded-full px-8 h-14 text-lg border-2 bg-transparent hover:bg-muted/50" onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}>
-              How it works
+              How It Works
             </Button>
           </motion.div>
 
