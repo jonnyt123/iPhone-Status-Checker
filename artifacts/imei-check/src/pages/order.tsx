@@ -165,9 +165,16 @@ export default function Order() {
                   <div className="bg-background border rounded-2xl p-5 space-y-4 shadow-sm">
                     <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">Included</h3>
                     <ul className="space-y-3 text-sm">
-                      <li className="flex items-center gap-3 font-medium"><CheckCircle2 className="w-5 h-5 text-success" /> Email Delivery</li>
+                      <li className="flex items-center gap-3 font-medium"><CheckCircle2 className="w-5 h-5 text-success" /> On-screen results page</li>
+                      <li className="flex items-center gap-3 font-medium"><CheckCircle2 className="w-5 h-5 text-success" /> Email copy of results</li>
                       <li className="flex items-center gap-3 font-medium"><CheckCircle2 className="w-5 h-5 text-success" /> Blacklist Check</li>
                     </ul>
+                  </div>
+
+                  <div className="bg-primary/5 border border-primary/20 rounded-2xl p-4 text-sm text-muted-foreground space-y-1">
+                    <p className="font-semibold text-foreground">What happens next?</p>
+                    <p>After payment, your device check will be processed and your results will be shown on a receipt-style results page.</p>
+                    <p>A copy of your results will also be emailed to you.</p>
                   </div>
 
                   <div className="space-y-3 text-xs text-muted-foreground bg-muted p-4 rounded-2xl">

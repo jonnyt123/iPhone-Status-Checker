@@ -1,0 +1,57 @@
+Update the website copy so it clearly tells users that their device-check results are shown on-screen on a results page after processing and are also emailed to them.
+
+Problem:
+The current website copy only says the results will be emailed to the user. That is outdated and incomplete because the app now includes a receipt-style results page that displays the live result for the user’s checked device.
+
+Required copy changes:
+
+1. Homepage hero section
+Replace any wording that says only that results are emailed.
+Use copy that explains both delivery methods:
+- results shown on-screen
+- results emailed to the user
+
+Use this updated hero copy:
+- Headline: Fast iPhone IMEI Check
+- Subheadline: Pay $0.99 CAD to receive available device-check results on-screen and by email.
+
+2. Order flow copy
+Update the order page text so users understand what happens after payment.
+Add clear messaging such as:
+- “After payment, your device check will be processed and your results will be shown on a receipt-style results page.”
+- “A copy of your results will also be emailed to you.”
+
+3. Success / processing state copy
+Update the payment success and processing screens to mention the results page.
+Use messaging like:
+- “Payment confirmed”
+- “Running device check”
+- “Preparing your results”
+- “Your results will appear on the next page and a copy will be sent to your email.”
+
+4. Results page copy
+At the top of the results page, add a short supporting line:
+- “Your device-check results are shown below and have also been emailed to you.”
+
+5. Homepage preview card / trust copy
+Anywhere the site currently suggests that email is the only delivery method, update it to mention both on-screen display and email delivery.
+
+6. FAQ updates
+Add or update an FAQ item:
+Question: How do I receive my results?
+Answer: After your payment is confirmed, your device-check results are shown on a receipt-style results page and a copy is also sent to your email address.
+
+7. Keep existing disclaimers
+Do not remove these notices:
+- “We return results only from authorized data sources.”
+- “Blacklist coverage depends on the provider and region.”
+- “Some checks may be unavailable depending on provider support.”
+- “Apple-related statuses are shown only when returned by the configured provider and are not inferred.”
+
+8. Preserve everything else
+- Keep the Apple-inspired Premium UI
+- Keep the receipt-style results page
+- Keep all payment logic
+- Keep all provider logic
+- Keep the email delivery
+This is a copy and UX clarity update only.

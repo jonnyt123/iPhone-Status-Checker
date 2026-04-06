@@ -24,15 +24,18 @@ export default function Success() {
               </div>
               
               <div className="space-y-4">
-                <h1 className="text-3xl font-bold tracking-tight" data-testid="text-success-title">Payment Received</h1>
+                <h1 className="text-3xl font-bold tracking-tight" data-testid="text-success-title">Payment Confirmed</h1>
                 <p className="text-muted-foreground text-lg font-medium max-w-sm mx-auto leading-relaxed" data-testid="text-success-message">
-                  Thank you. Your device check is currently processing securely.
+                  Running device check. Preparing your results.
                 </p>
               </div>
 
-              <div className="bg-background rounded-2xl p-6 border shadow-sm" data-testid="text-success-details">
+              <div className="bg-background rounded-2xl p-6 border shadow-sm space-y-3" data-testid="text-success-details">
                 <p className="text-muted-foreground font-medium">
-                  We will email you the detailed report as soon as it is available (usually within minutes). You may close this page.
+                  Your results will appear on the next page and a copy will be sent to your email.
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  This usually takes just a few minutes.
                 </p>
               </div>
 

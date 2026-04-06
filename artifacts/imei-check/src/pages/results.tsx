@@ -172,7 +172,7 @@ export default function Results() {
           </div>
 
           <p className="text-center text-sm text-muted-foreground">
-            This page refreshes automatically. Results will also be emailed to you when ready.
+            This page refreshes automatically. Your results will appear here once processing is complete and a copy will be sent to your email.
           </p>
         </div>
       </Layout>
@@ -264,6 +264,9 @@ export default function Results() {
           <h1 className="text-4xl font-bold tracking-tight" data-testid="text-results-title">Device Report</h1>
           <p className="text-muted-foreground flex items-center justify-center gap-2">
             <Hash className="w-4 h-4" /> Order #{results.orderId.split('-')[0]}
+          </p>
+          <p className="text-sm text-muted-foreground pt-1" data-testid="text-results-delivery-note">
+            Your device-check results are shown below and have also been emailed to you.
           </p>
         </div>
 

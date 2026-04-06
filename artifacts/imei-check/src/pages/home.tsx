@@ -23,7 +23,7 @@ export default function Home() {
               Fast iPhone IMEI Check
             </h1>
             <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto font-medium" data-testid="text-home-subheadline">
-              Pay $0.99 CAD to receive available device-check results by email.
+              Pay $0.99 CAD to receive available device-check results on-screen and by email.
             </p>
           </motion.div>
 
@@ -86,7 +86,7 @@ export default function Home() {
                   </span>
                 </div>
               </div>
-              <p className="text-xs text-muted-foreground text-center mt-4">Results delivered to your inbox after payment</p>
+              <p className="text-xs text-muted-foreground text-center mt-4">Results shown on-screen and emailed to you after payment</p>
             </div>
           </motion.div>
 
@@ -114,7 +114,7 @@ export default function Home() {
               { icon: Mail, title: "Enter Email", desc: "Where we'll send the report." },
               { icon: Smartphone, title: "Enter IMEI", desc: "Found in Settings or dialing *#06#." },
               { icon: CreditCard, title: "Pay $0.99", desc: "Secure checkout via Stripe." },
-              { icon: ChevronRight, title: "Get Results", desc: "Delivered instantly to your inbox." }
+              { icon: ChevronRight, title: "Get Results", desc: "Shown on-screen and emailed to you." }
             ].map((step, i) => (
               <Card key={i} className="rounded-3xl border-none shadow-md bg-card">
                 <CardContent className="p-8 flex flex-col items-center text-center space-y-4">
@@ -139,7 +139,7 @@ export default function Home() {
                 <span className="text-xl text-muted-foreground font-medium">CAD</span>
               </div>
               <ul className="space-y-4 w-full mb-10 text-left">
-                <li className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-primary" /> <span>Instant email delivery</span></li>
+                <li className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-primary" /> <span>On-screen results + email copy</span></li>
                 <li className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-primary" /> <span>Blacklist status check</span></li>
                 <li className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-primary" /> <span>Activation lock status (when available)</span></li>
                 <li className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-primary" /> <span>Secure Stripe payment</span></li>
@@ -192,9 +192,15 @@ export default function Home() {
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-2" className="border-b-border/50 py-2">
+              <AccordionTrigger className="text-base font-semibold hover:no-underline hover:text-primary">How do I receive my results?</AccordionTrigger>
+              <AccordionContent className="text-muted-foreground leading-relaxed text-base">
+                After your payment is confirmed, your device-check results are shown on a receipt-style results page and a copy is also sent to your email address.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="item-2b" className="border-b-border/50 py-2">
               <AccordionTrigger className="text-base font-semibold hover:no-underline hover:text-primary">How long do results take?</AccordionTrigger>
               <AccordionContent className="text-muted-foreground leading-relaxed text-base">
-                Results are typically processed instantly and emailed to you within minutes of successful payment.
+                Results are typically processed within minutes of successful payment. You will be redirected to your results page automatically.
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-3" className="border-b-border/50 py-2">
