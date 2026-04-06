@@ -52,30 +52,41 @@ export default function Home() {
           >
             <div className="bg-card rounded-3xl p-6 shadow-xl border relative overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
+              <div className="absolute top-3 right-3">
+                <span className="bg-muted text-muted-foreground text-[10px] font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider border">
+                  Sample layout
+                </span>
+              </div>
               <div className="flex items-center gap-4 mb-6 border-b pb-4">
                 <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary">
                   <Smartphone className="w-6 h-6" />
                 </div>
                 <div className="text-left">
-                  <h3 className="font-semibold text-lg">iPhone 14 Pro Max</h3>
-                  <p className="text-muted-foreground text-sm">IMEI: 351234567890123</p>
+                  <h3 className="font-semibold text-lg text-muted-foreground">Device Check Receipt</h3>
+                  <p className="text-muted-foreground text-sm">Brand: —&nbsp;&nbsp;Model: —</p>
                 </div>
               </div>
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <div className="flex justify-between items-center bg-background rounded-2xl p-4 border">
                   <span className="text-sm font-medium text-muted-foreground">Blacklist Status</span>
-                  <span className="bg-success/10 text-success px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
-                    <Check className="w-3 h-3" /> Clear
+                  <span className="bg-muted text-muted-foreground px-3 py-1 rounded-full text-xs font-semibold">
+                    Pending
                   </span>
                 </div>
                 <div className="flex justify-between items-center bg-background rounded-2xl p-4 border">
                   <span className="text-sm font-medium text-muted-foreground">Activation Lock</span>
                   <span className="bg-muted text-muted-foreground px-3 py-1 rounded-full text-xs font-semibold">
-                    Unavailable
+                    Pending
+                  </span>
+                </div>
+                <div className="flex justify-between items-center bg-background rounded-2xl p-4 border">
+                  <span className="text-sm font-medium text-muted-foreground">Find My</span>
+                  <span className="bg-muted text-muted-foreground px-3 py-1 rounded-full text-xs font-semibold">
+                    Pending
                   </span>
                 </div>
               </div>
-              <p className="text-xs text-muted-foreground text-center mt-4">* Results vary by provider</p>
+              <p className="text-xs text-muted-foreground text-center mt-4">Results delivered to your inbox after payment</p>
             </div>
           </motion.div>
 

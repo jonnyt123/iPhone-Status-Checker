@@ -1,0 +1,82 @@
+Audit the entire app and remove all hardcoded fake result data from production UI.
+
+Problem to fix:
+The homepage and/or results components are showing a hardcoded example device such as “iPhone 14 Pro Max” and possibly other static fake result values. This is not acceptable. The app must never display a specific real-looking device result unless that data came from an actual completed lookup for that user’s order.
+
+Required changes:
+
+1. Full audit
+- Search the whole codebase for all hardcoded example device values, including but not limited to:
+  - iPhone 14 Pro Max
+  - sample IMEI values
+  - sample blacklist statuses
+  - sample activation lock statuses
+  - sample find my statuses
+  - any fake provider result values
+- Remove or replace any production-facing hardcoded result values
+- Ensure no production UI component ships with fake live device data
+
+2. Homepage behavior
+- The homepage must not display a real-looking device result for a specific phone model
+- Replace the current example card with a clearly generic preview component
+- The homepage preview must use placeholder values only, such as:
+  - Device Check Receipt
+  - Brand: —
+  - Model: —
+  - Blacklist Status: Pending
+  - Activation Lock: Pending
+  - Find My: Pending
+- Add a subtle label such as:
+  - Preview
+  - Sample layout
+  - Example interface
+- Do not show a specific model name on the homepage unless it is from a real completed lookup tied to a real order/session
+
+3. Results page behavior
+- The results page must be fully dynamic
+- Bind the displayed receipt to the actual order record in the database
+- Pull displayed data from the normalized provider response associated with that order only
+- The displayed device information must match:
+  - the identifier submitted by the user
+  - the provider response returned for that identifier
+  - the paid order record
+- If no real result exists yet, show a processing state instead of placeholder data
+
+4. Real-time processing states
+Implement clear state handling:
+- Order created
+- Payment confirmed
+- Running device check
+- Provider response received
+- Preparing your receipt
+- Email sent
+Do not show fake completed results while any of these are still pending
+
+5. Data integrity enforcement
+- Ensure the app uses the exact IMEI or serial entered by the customer for the provider lookup
+- Ensure the results component reads from the stored database record, not a local mock object
+- Ensure all result fields are dynamic and null-safe
+- If a field is missing from provider response, show “Unavailable from provider”
+- Never infer missing statuses
+
+6. Development vs production data separation
+- Mock data may exist for local development or tests only
+- Any mock/sample data must be isolated behind an explicit development-only flag
+- Production builds must never render mock result values
+- Add a safeguard that prevents mock result objects from being used in production mode
+
+7. Admin/debug visibility
+- In admin, show:
+  - provider called yes/no
+  - provider HTTP status
+  - provider response received yes/no
+  - email sent yes/no
+  - order timeline
+- This should help confirm the result shown on the user page is coming from real order data
+
+8. Final cleanup
+- Remove all marketing fake device examples that look like real returned results
+- Keep the Apple-inspired Premium UI
+- Keep the receipt-style results design
+- Preserve all payment, provider, and email logic
+- This is a production integrity fix and should eliminate all misleading hardcoded result content

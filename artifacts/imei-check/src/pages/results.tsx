@@ -1,20 +1,50 @@
 import { useGetOrderResults, getGetOrderResultsQueryKey } from "@workspace/api-client-react";
 import { useParams } from "wouter";
+import { useEffect } from "react";
 import { Layout } from "@/components/layout";
 import { Card, CardContent } from "@/components/ui/card";
-import { ShieldCheck, AlertCircle, CheckCircle2, Loader2, Smartphone, FileText, Activity, Server, Hash, Check, X, Minus, Info } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { ShieldCheck, AlertCircle, CheckCircle2, Loader2, Smartphone, FileText, Activity, Server, Hash, Check, X, Minus, Info, Mail, CreditCard, Circle, Lock } from "lucide-react";
+
+const PROCESSING_STEPS = [
+  { key: "order_created", label: "Order created", icon: FileText },
+  { key: "payment_confirmed", label: "Payment confirmed", icon: CreditCard },
+  { key: "running_check", label: "Running device check", icon: Activity },
+  { key: "provider_response", label: "Provider response received", icon: Server },
+  { key: "preparing_receipt", label: "Preparing your receipt", icon: FileText },
+  { key: "email_sent", label: "Email sent", icon: Mail },
+] as const;
+
+function getActiveStep(checkStatus: string): number {
+  if (checkStatus === "pending") return 1;
+  if (checkStatus === "in_progress") return 2;
+  if (checkStatus === "completed") return 5;
+  return 1;
+}
 
 export default function Results() {
   const { orderId } = useParams();
-  
-  const { data: results, isLoading, error } = useGetOrderResults(orderId || "", {
+
+  const { data: results, isLoading, error, refetch } = useGetOrderResults(orderId || "", {
     query: {
       enabled: !!orderId,
       queryKey: getGetOrderResultsQueryKey(orderId || ""),
-      retry: false
+      retry: false,
     }
   });
+
+  const isProcessing =
+    results &&
+    results.paymentStatus === "paid" &&
+    results.checkStatus !== "completed" &&
+    results.checkStatus !== "failed";
+
+  useEffect(() => {
+    if (!isProcessing) return;
+    const timer = setInterval(() => {
+      void refetch();
+    }, 4000);
+    return () => clearInterval(timer);
+  }, [isProcessing, refetch]);
 
   if (isLoading) {
     return (
@@ -41,8 +71,8 @@ export default function Results() {
             </div>
             <h2 className="text-2xl font-bold">Report Unavailable</h2>
             <p className="text-muted-foreground text-lg" data-testid="text-results-error">
-              {isPaymentRequired 
-                ? "This order requires payment before results can be viewed." 
+              {isPaymentRequired
+                ? "This order requires payment before results can be viewed."
                 : "We could not fetch the results. The check may still be processing or the link is invalid."}
             </p>
           </div>
@@ -60,6 +90,90 @@ export default function Results() {
             <h2 className="text-2xl font-bold">No Results Found</h2>
             <p className="text-muted-foreground">The requested report could not be located.</p>
           </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (results.checkStatus === "failed") {
+    return (
+      <Layout>
+        <div className="max-w-xl mx-auto py-16 px-4">
+          <div className="bg-destructive/5 border border-destructive/20 rounded-[2rem] p-8 text-center space-y-4">
+            <div className="w-16 h-16 bg-destructive/10 text-destructive rounded-full flex items-center justify-center mx-auto">
+              <AlertCircle className="w-8 h-8" />
+            </div>
+            <h2 className="text-2xl font-bold">Check Failed</h2>
+            <p className="text-muted-foreground text-base" data-testid="text-results-error">
+              We were unable to complete the device check. Please contact support for assistance — your payment has been recorded and we will follow up.
+            </p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (isProcessing) {
+    const activeStep = getActiveStep(results.checkStatus ?? "pending");
+    return (
+      <Layout>
+        <div className="max-w-xl mx-auto py-16 px-4 space-y-8">
+          <div className="text-center space-y-3">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-primary/10 text-primary mb-4">
+              <Loader2 className="w-8 h-8 animate-spin" />
+            </div>
+            <h1 className="text-3xl font-bold tracking-tight">Processing Your Check</h1>
+            <p className="text-muted-foreground">
+              Order #{results.orderId.split("-")[0]} · Payment confirmed
+            </p>
+          </div>
+
+          <div className="bg-card border rounded-[2rem] p-8 shadow-sm">
+            <ol className="relative border-l border-border ml-3 space-y-6">
+              {PROCESSING_STEPS.map((step, i) => {
+                const Icon = step.icon;
+                const done = i < activeStep;
+                const active = i === activeStep;
+                return (
+                  <li key={step.key} className="ml-6">
+                    <span
+                      className={`absolute -left-3.5 flex items-center justify-center w-7 h-7 rounded-full border-2 ${
+                        done
+                          ? "bg-primary border-primary text-primary-foreground"
+                          : active
+                          ? "bg-primary/10 border-primary text-primary"
+                          : "bg-muted border-border text-muted-foreground"
+                      }`}
+                    >
+                      {done ? (
+                        <Check className="w-3.5 h-3.5" />
+                      ) : active ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <Circle className="w-3.5 h-3.5 opacity-30" />
+                      )}
+                    </span>
+                    <p
+                      className={`text-sm font-medium ${
+                        done
+                          ? "text-foreground"
+                          : active
+                          ? "text-primary font-semibold"
+                          : "text-muted-foreground"
+                      }`}
+                    >
+                      {step.label}
+                      {active && "…"}
+                    </p>
+                  </li>
+                );
+              })}
+            </ol>
+          </div>
+
+          <p className="text-center text-sm text-muted-foreground">
+            This page refreshes automatically. Results will also be emailed to you when ready.
+          </p>
         </div>
       </Layout>
     );
