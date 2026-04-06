@@ -25,6 +25,8 @@ import type {
   AdminOrdersListResponse,
   AdminResendEmail200,
   AdminStats,
+  AdminTestProvider200,
+  AdminTestProviderBody,
   ApiError,
   AuditLogsResponse,
   CheckoutSessionResponse,
@@ -1295,6 +1297,92 @@ export function useGetAdminStats<
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+/**
+ * @summary Run a provider check for a test IMEI
+ */
+export const getAdminTestProviderUrl = () => {
+  return `/api/admin/test-provider`;
+};
+
+export const adminTestProvider = async (
+  adminTestProviderBody: AdminTestProviderBody,
+  options?: RequestInit,
+): Promise<AdminTestProvider200> => {
+  return customFetch<AdminTestProvider200>(getAdminTestProviderUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(adminTestProviderBody),
+  });
+};
+
+export const getAdminTestProviderMutationOptions = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof adminTestProvider>>,
+    TError,
+    { data: BodyType<AdminTestProviderBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof adminTestProvider>>,
+  TError,
+  { data: BodyType<AdminTestProviderBody> },
+  TContext
+> => {
+  const mutationKey = ["adminTestProvider"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof adminTestProvider>>,
+    { data: BodyType<AdminTestProviderBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return adminTestProvider(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type AdminTestProviderMutationResult = NonNullable<
+  Awaited<ReturnType<typeof adminTestProvider>>
+>;
+export type AdminTestProviderMutationBody = BodyType<AdminTestProviderBody>;
+export type AdminTestProviderMutationError = ErrorType<ApiError>;
+
+/**
+ * @summary Run a provider check for a test IMEI
+ */
+export const useAdminTestProvider = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof adminTestProvider>>,
+    TError,
+    { data: BodyType<AdminTestProviderBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof adminTestProvider>>,
+  TError,
+  { data: BodyType<AdminTestProviderBody> },
+  TContext
+> => {
+  return useMutation(getAdminTestProviderMutationOptions(options));
+};
 
 /**
  * @summary Get audit log for an order

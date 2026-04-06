@@ -279,6 +279,10 @@ export type AdminOrderDetail = AdminOrderSummary & {
   model?: string | null;
   manufacturer?: string | null;
   checkedAt?: string | null;
+  providerCalled?: boolean;
+  providerHttpStatus?: number | null;
+  providerResponseReceived?: boolean;
+  providerErrorMessage?: string | null;
 };
 
 export type AdminStatsOrdersByStatusItem = {
@@ -354,4 +358,24 @@ export type AdminResendEmail200 = {
 
 export type AdminMarkRefundReview200 = {
   success: boolean;
+};
+
+export type AdminTestProviderBody = {
+  imei: string;
+};
+
+export type AdminTestProvider200Meta = {
+  providerCalled: boolean;
+  providerHttpStatus?: number | null;
+  providerResponseReceived: boolean;
+  providerErrorMessage?: string | null;
+};
+
+export type AdminTestProvider200Normalized = { [key: string]: unknown } | null;
+
+export type AdminTestProvider200 = {
+  success: boolean;
+  meta?: AdminTestProvider200Meta;
+  normalized?: AdminTestProvider200Normalized;
+  error?: string | null;
 };

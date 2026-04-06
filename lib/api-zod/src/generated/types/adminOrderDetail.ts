@@ -19,4 +19,8 @@ export type AdminOrderDetail = AdminOrderSummary & {
   model?: string | null;
   manufacturer?: string | null;
   checkedAt?: Date | null;
+  providerCalled?: boolean;
+  providerHttpStatus?: number | null;
+  providerResponseReceived?: boolean;
+  providerErrorMessage?: string | null;
 };

@@ -5,7 +5,6 @@ import {
   integer,
   boolean,
   uuid,
-  jsonb,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
@@ -30,6 +29,10 @@ export const ordersTable = pgTable("orders", {
   findMyStatus: text("find_my_status"),
   providerCoverageNotes: text("provider_coverage_notes"),
   rawProviderResponseEncrypted: text("raw_provider_response_encrypted"),
+  providerCalled: boolean("provider_called").notNull().default(false),
+  providerHttpStatus: integer("provider_http_status"),
+  providerResponseReceived: boolean("provider_response_received").notNull().default(false),
+  providerErrorMessage: text("provider_error_message"),
   stripeCheckoutSessionId: text("stripe_checkout_session_id"),
   stripePaymentIntentId: text("stripe_payment_intent_id"),
   checkedAt: timestamp("checked_at", { withTimezone: true }),

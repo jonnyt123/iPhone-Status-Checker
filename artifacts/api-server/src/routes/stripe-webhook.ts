@@ -39,7 +39,8 @@ async function processWebhookEvent(event: Stripe.Event): Promise<void> {
       .update(ordersTable)
       .set({
         paymentStatus: "paid",
-        stripePaymentIntentId: typeof session.payment_intent === "string" ? session.payment_intent : null,
+        stripePaymentIntentId:
+          typeof session.payment_intent === "string" ? session.payment_intent : null,
         checkStatus: "in_progress",
       })
       .where(eq(ordersTable.id, orderId));
@@ -47,14 +48,36 @@ async function processWebhookEvent(event: Stripe.Event): Promise<void> {
     await db.insert(auditLogsTable).values({
       orderId,
       eventType: "payment_completed",
-      eventPayload: { sessionId: session.id, paymentIntent: session.payment_intent },
+      eventPayload: {
+        sessionId: session.id,
+        paymentIntent: session.payment_intent,
+      },
     });
 
-    logger.info({ orderId }, "Payment confirmed — running provider check");
+    logger.info({ orderId }, "Payment confirmed — starting provider check");
+
+    const identifier = decrypt(order.identifierEncrypted);
+    logger.info(
+      { orderId, imeiSuffix: identifier.slice(-4), identifierType: order.identifierType },
+      "Webhook: decrypted identifier for provider call"
+    );
+
+    await db.insert(auditLogsTable).values({
+      orderId,
+      eventType: "provider_check_started",
+      eventPayload: {
+        identifierType: order.identifierType,
+        imeiSuffix: identifier.slice(-4),
+        providerUrl: "https://www.imeiapi.org/checkimei/",
+      },
+    });
 
     try {
-      const identifier = decrypt(order.identifierEncrypted);
-      const result = await runProviderCheck(identifier, order.identifierType, order.identifierMasked);
+      const { normalized: result, meta } = await runProviderCheck(
+        identifier,
+        order.identifierType,
+        order.identifierMasked
+      );
 
       await db
         .update(ordersTable)
@@ -70,6 +93,10 @@ async function processWebhookEvent(event: Stripe.Event): Promise<void> {
           providerCoverageNotes: result.providerCoverageNotes,
           rawProviderResponseEncrypted: result.rawProviderResponseEncrypted,
           checkedAt: result.checkedAt,
+          providerCalled: meta.providerCalled,
+          providerHttpStatus: meta.providerHttpStatus,
+          providerResponseReceived: meta.providerResponseReceived,
+          providerErrorMessage: meta.providerErrorMessage,
         })
         .where(eq(ordersTable.id, orderId));
 
@@ -78,80 +105,115 @@ async function processWebhookEvent(event: Stripe.Event): Promise<void> {
         eventType: "provider_check_completed",
         eventPayload: {
           providerName: result.providerName,
+          httpStatus: meta.providerHttpStatus,
           blacklistStatus: result.blacklistStatus,
           activationLockStatus: result.activationLockStatus,
           findMyStatus: result.findMyStatus,
         },
       });
 
-      await sendResultEmail({
-        orderId,
-        email: order.email,
-        checkedAt: result.checkedAt,
-        identifierMasked: order.identifierMasked,
-        identifierType: order.identifierType,
-        providerName: result.providerName,
-        brand: result.brand,
-        model: result.model,
-        manufacturer: result.manufacturer,
-        blacklistStatus: result.blacklistStatus,
-        activationLockStatus: result.activationLockStatus,
-        findMyStatus: result.findMyStatus,
-        providerCoverageNotes: result.providerCoverageNotes,
-      });
+      logger.info({ orderId }, "Provider check completed — sending result email");
 
-      await db.insert(auditLogsTable).values({
-        orderId,
-        eventType: "result_email_sent",
-        eventPayload: { email: order.email },
-      });
+      try {
+        await sendResultEmail({
+          orderId,
+          email: order.email,
+          checkedAt: result.checkedAt,
+          identifierMasked: order.identifierMasked,
+          identifierType: order.identifierType,
+          providerName: result.providerName,
+          brand: result.brand,
+          model: result.model,
+          manufacturer: result.manufacturer,
+          blacklistStatus: result.blacklistStatus,
+          activationLockStatus: result.activationLockStatus,
+          findMyStatus: result.findMyStatus,
+          providerCoverageNotes: result.providerCoverageNotes,
+        });
+
+        await db.insert(auditLogsTable).values({
+          orderId,
+          eventType: "result_email_sent",
+          eventPayload: { email: order.email },
+        });
+      } catch (emailErr) {
+        logger.error({ emailErr, orderId }, "Failed to send result email — provider check succeeded but email failed");
+        await db.insert(auditLogsTable).values({
+          orderId,
+          eventType: "result_email_failed",
+          eventPayload: { email: order.email, error: String(emailErr) },
+        });
+      }
     } catch (err) {
-      logger.error({ err, orderId }, "Provider check failed");
+      const msg = err instanceof Error ? err.message : String(err);
+      logger.error({ err, orderId, msg }, "Provider check FAILED — storing failure diagnostics");
+
+      let providerHttpStatus: number | null = null;
+      if (msg.includes("HTTP ")) {
+        const match = msg.match(/HTTP (\d{3})/);
+        if (match) providerHttpStatus = parseInt(match[1], 10);
+      }
+
       await db
         .update(ordersTable)
-        .set({ checkStatus: "failed" })
+        .set({
+          checkStatus: "failed",
+          providerCalled: true,
+          providerHttpStatus,
+          providerResponseReceived: false,
+          providerErrorMessage: msg.slice(0, 1000),
+        })
         .where(eq(ordersTable.id, orderId));
 
       await db.insert(auditLogsTable).values({
         orderId,
         eventType: "provider_check_failed",
-        eventPayload: { error: String(err) },
+        eventPayload: {
+          error: msg,
+          httpStatus: providerHttpStatus,
+        },
       });
     }
   }
 }
 
-router.post("/stripe/webhook", async (req: Request, res: Response): Promise<void> => {
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+router.post(
+  "/stripe/webhook",
+  async (req: Request, res: Response): Promise<void> => {
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
-  let event;
+    let event;
 
-  if (webhookSecret) {
-    const sig = req.headers["stripe-signature"];
-    if (!sig || typeof sig !== "string") {
-      res.status(400).json({ error: "Missing stripe-signature header" });
-      return;
+    if (webhookSecret) {
+      const sig = req.headers["stripe-signature"];
+      if (!sig || typeof sig !== "string") {
+        res.status(400).json({ error: "Missing stripe-signature header" });
+        return;
+      }
+
+      try {
+        const stripe = await getUncachableStripeClient();
+        event = stripe.webhooks.constructEvent(
+          req.body as Buffer,
+          sig,
+          webhookSecret
+        );
+      } catch (err) {
+        logger.error({ err }, "Stripe webhook signature verification failed");
+        res.status(400).json({ error: "Webhook signature verification failed" });
+        return;
+      }
+    } else {
+      logger.warn("STRIPE_WEBHOOK_SECRET not set — skipping signature verification");
+      event = req.body as Stripe.Event;
     }
 
-    try {
-      const stripe = await getUncachableStripeClient();
-      event = stripe.webhooks.constructEvent(req.body as Buffer, sig, webhookSecret);
-    } catch (err) {
-      logger.error({ err }, "Stripe webhook signature verification failed");
-      res.status(400).json({ error: "Webhook signature verification failed" });
-      return;
-    }
-  } else {
-    logger.warn("STRIPE_WEBHOOK_SECRET not set — skipping signature verification");
-    event = req.body as Stripe.Event;
+    res.json({ received: true });
+
+    processWebhookEvent(event).catch((err) => {
+      logger.error({ err, eventType: event.type }, "Error processing webhook event");
+    });
   }
-
-  res.json({ received: true });
-
-  // Process asynchronously after responding
-  processWebhookEvent(event).catch((err) => {
-    logger.error({ err, eventType: event.type }, "Error processing webhook event");
-  });
-});
+);
 
 export default router;

@@ -208,6 +208,10 @@ export const GetAdminOrderResponse = zod
       model: zod.string().nullish(),
       manufacturer: zod.string().nullish(),
       checkedAt: zod.coerce.date().nullish(),
+      providerCalled: zod.boolean().optional(),
+      providerHttpStatus: zod.number().nullish(),
+      providerResponseReceived: zod.boolean().optional(),
+      providerErrorMessage: zod.string().nullish(),
     }),
   );
 
@@ -251,6 +255,27 @@ export const GetAdminStatsResponse = zod.object({
       count: zod.number(),
     }),
   ),
+});
+
+/**
+ * @summary Run a provider check for a test IMEI
+ */
+export const AdminTestProviderBody = zod.object({
+  imei: zod.string(),
+});
+
+export const AdminTestProviderResponse = zod.object({
+  success: zod.boolean(),
+  meta: zod
+    .object({
+      providerCalled: zod.boolean(),
+      providerHttpStatus: zod.number().nullish(),
+      providerResponseReceived: zod.boolean(),
+      providerErrorMessage: zod.string().nullish(),
+    })
+    .optional(),
+  normalized: zod.object({}).passthrough().nullish(),
+  error: zod.string().nullish(),
 });
 
 /**

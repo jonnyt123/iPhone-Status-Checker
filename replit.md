@@ -38,11 +38,10 @@ A production-ready paid web service where customers enter their email + IMEI num
 - `ADMIN_EMAIL` — admin dashboard login email
 - `ADMIN_PASSWORD` — admin dashboard login password
 - `STRIPE_WEBHOOK_SECRET` — (optional) Stripe webhook signing secret for production security
-- `IMEIAPI_BASE_URL` — IMEI provider base URL (e.g. https://imeiapi.org)
-- `IMEIAPI_KEY` — IMEI provider API key
+- `IMEIAPI_KEY` — IMEI provider API key for imeiapi.org (required for real checks)
 - `IMEIAPI_SUPPORTS_SERIAL` — set to `true` to allow serial number lookups (default: false)
 - `PROVIDER_NAME` — display name for the provider shown in results
-- `MOCK_PROVIDER` — set to `true` to use mock provider (for testing without a real provider)
+- `MOCK_PROVIDER` — set to `true` to use mock provider (for testing without a real provider). Also activates automatically if IMEIAPI_KEY is not set.
 - `APP_BASE_URL` — production base URL (auto-detected if not set)
 
 ## Architecture
@@ -54,11 +53,13 @@ A production-ready paid web service where customers enter their email + IMEI num
 4. User sees success screen ("check your email")
 
 ### Provider Adapter (`artifacts/api-server/src/lib/provider.ts`)
-- Calls imeiapi.org-style REST endpoint
-- Maps only fields actually returned by the provider
-- Missing fields → "unavailable" (never inferred)
-- Retries transient failures up to 2 times
-- Mock mode available via `MOCK_PROVIDER=true` or when `IMEIAPI_BASE_URL` is not set
+- POSTs to `https://www.imeiapi.org/checkimei/` with `multipart/form-data` (fields: `key`, `imei`)
+- Returns `ProviderCheckResult { normalized, meta }` where meta tracks diagnostic info
+- Maps only fields actually returned by the provider — missing fields → "unavailable" (never inferred)
+- Logs request start, HTTP status, and sanitized response body
+- Fails loudly (logs ERROR) when IMEIAPI_KEY is missing, auth fails (401/403), or quota exceeded (429)
+- Mock mode when `MOCK_PROVIDER=true` or `IMEIAPI_KEY` is not set (logs warning)
+- Provider diagnostics stored per order: `providerCalled`, `providerHttpStatus`, `providerResponseReceived`, `providerErrorMessage`
 
 ### Stripe Integration
 - Uses Replit connector — no manual Stripe keys needed in development
@@ -97,8 +98,16 @@ A production-ready paid web service where customers enter their email + IMEI num
 
 ## Database Tables
 
-- `orders` — all orders with encrypted identifier, payment/check status, result fields
-- `audit_logs` — event log per order (created, paid, checked, email sent, admin actions)
+- `orders` — all orders with encrypted identifier, payment/check status, result fields, and provider diagnostics (`providerCalled`, `providerHttpStatus`, `providerResponseReceived`, `providerErrorMessage`)
+- `audit_logs` — event log per order: `order_created`, `payment_completed`, `provider_check_started`, `provider_check_completed`, `provider_check_failed`, `result_email_sent`, `result_email_failed`, `admin_resend_email`, `admin_marked_refund_review`
+
+## Admin Features
+
+- **Order detail page** — payment info, device info, provider diagnostics, order timeline, raw audit log
+- **Order timeline** — visual step tracker: Order Created → Payment Confirmed → Provider Called → Results Saved → Email Sent
+- **Provider diagnostics card** — shows: provider called (yes/no), HTTP status, response received (yes/no), error message
+- **Test Provider button** — admin can enter any IMEI and run a live provider check; shows raw normalized result and meta diagnostics
+- **Admin endpoint** `POST /api/admin/test-provider` — requires admin auth, body `{ imei: string }`
 
 ## Stripe Webhook Setup (Production)
 

@@ -11,7 +11,7 @@ import {
 } from "@workspace/api-zod";
 import { runProviderCheck } from "../lib/provider";
 import { sendResultEmail } from "../lib/email";
-import { decrypt } from "../lib/crypto";
+import { logger } from "../lib/logger";
 import type { Request, Response } from "express";
 
 const router: IRouter = Router();
@@ -75,9 +75,6 @@ router.get("/admin/orders", async (req, res): Promise<void> => {
 
   const { page = 1, limit = 20, search, paymentStatus, checkStatus } = params.data;
   const offset = (page - 1) * limit;
-
-  let query = db.select().from(ordersTable);
-  let countQuery = db.select({ count: count() }).from(ordersTable);
 
   const conditions = [];
   if (search) {
@@ -167,6 +164,10 @@ router.get("/admin/orders/:orderId", async (req, res): Promise<void> => {
     brand: order.brand,
     model: order.model,
     manufacturer: order.manufacturer,
+    providerCalled: order.providerCalled,
+    providerHttpStatus: order.providerHttpStatus,
+    providerResponseReceived: order.providerResponseReceived,
+    providerErrorMessage: order.providerErrorMessage,
     refundReview: order.refundReview,
     stripeCheckoutSessionId: order.stripeCheckoutSessionId,
     stripePaymentIntentId: order.stripePaymentIntentId,
@@ -220,7 +221,7 @@ router.post("/admin/orders/:orderId/resend-email", async (req, res): Promise<voi
 
     res.json({ success: true });
   } catch (err) {
-    req.log.error({ err, orderId: order.id }, "Failed to resend email");
+    logger.error({ err, orderId: order.id }, "Failed to resend email");
     res.status(500).json({ error: "email_error", message: "Failed to send email" });
   }
 });
@@ -256,6 +257,67 @@ router.post("/admin/orders/:orderId/mark-refund-review", async (req, res): Promi
   });
 
   res.json({ success: true });
+});
+
+router.post("/admin/test-provider", async (req, res): Promise<void> => {
+  if (!requireAdmin(req, res)) return;
+
+  const imei = req.body?.imei;
+  if (!imei || typeof imei !== "string" || !/^\d{15,17}$/.test(imei.trim())) {
+    res.status(400).json({
+      error: "validation_error",
+      message: "A valid IMEI (15–17 digits) is required",
+    });
+    return;
+  }
+
+  const testImei = imei.trim();
+  const maskedImei = testImei.slice(0, 2) + "***" + testImei.slice(-4);
+
+  logger.info(
+    { adminEmail: req.session?.adminEmail, imeiSuffix: testImei.slice(-4) },
+    "Admin: test provider check initiated"
+  );
+
+  try {
+    const { normalized, meta } = await runProviderCheck(testImei, "imei", maskedImei);
+
+    res.json({
+      success: true,
+      meta,
+      normalized: {
+        providerName: normalized.providerName,
+        checkedAt: normalized.checkedAt,
+        brand: normalized.brand,
+        model: normalized.model,
+        manufacturer: normalized.manufacturer,
+        blacklistStatus: normalized.blacklistStatus,
+        activationLockStatus: normalized.activationLockStatus,
+        findMyStatus: normalized.findMyStatus,
+        providerCoverageNotes: normalized.providerCoverageNotes,
+      },
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    logger.error({ err }, "Admin: test provider check failed");
+
+    let providerHttpStatus: number | null = null;
+    if (msg.includes("HTTP ")) {
+      const match = msg.match(/HTTP (\d{3})/);
+      if (match) providerHttpStatus = parseInt(match[1], 10);
+    }
+
+    res.status(502).json({
+      success: false,
+      error: msg,
+      meta: {
+        providerCalled: true,
+        providerHttpStatus,
+        providerResponseReceived: false,
+        providerErrorMessage: msg,
+      },
+    });
+  }
 });
 
 router.get("/admin/stats", async (req, res): Promise<void> => {
