@@ -1,9 +1,10 @@
-// Stripe integration via Replit connectors
+// Stripe integration — uses STRIPE_SECRET_KEY env var if set,
+// otherwise falls back to Replit connector credentials.
 import Stripe from "stripe";
 
 let connectionSettings: { settings: { publishable: string; secret: string } } | undefined;
 
-async function getCredentials() {
+async function getCredentialsFromConnector() {
   const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
   const xReplitToken = process.env.REPL_IDENTITY
     ? "repl " + process.env.REPL_IDENTITY
@@ -48,7 +49,23 @@ async function getCredentials() {
   };
 }
 
-// WARNING: Never cache this client — tokens expire.
+async function getCredentials() {
+  // Use direct env var keys if provided (e.g. set in Replit Publishing secrets)
+  const directSecret = process.env.STRIPE_SECRET_KEY;
+  const directPublishable = process.env.STRIPE_PUBLISHABLE_KEY;
+
+  if (directSecret) {
+    return {
+      secretKey: directSecret,
+      publishableKey: directPublishable ?? "",
+    };
+  }
+
+  // Fall back to Replit connector
+  return getCredentialsFromConnector();
+}
+
+// WARNING: Never cache this client — tokens expire when using connector.
 export async function getUncachableStripeClient() {
   const { secretKey } = await getCredentials();
   return new Stripe(secretKey, {
