@@ -730,6 +730,10 @@ components:
               type: string
               format: date-time
               nullable: true
+            webhookReceived:
+              type: boolean
+            emailSent:
+              type: boolean
             providerCalled:
               type: boolean
             providerHttpStatus:

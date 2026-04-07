@@ -384,6 +384,11 @@ export default function AdminOrderDetail() {
             </div>
             <CardContent className="p-6">
               <DetailRow label="Email Address" value={order.email} />
+              <DetailRow label="Payment Source" value="Stripe Checkout Session" />
+              <DetailRow
+                label="Paid"
+                value={<YesNo value={order.paymentStatus === "paid"} />}
+              />
               <DetailRow
                 label="Payment Status"
                 value={
@@ -400,7 +405,7 @@ export default function AdminOrderDetail() {
                 }
               />
               <DetailRow
-                label="Amount Paid"
+                label="Amount"
                 value={`$${(order.amount / 100).toFixed(2)} ${order.currency}`}
               />
               <DetailRow
@@ -498,20 +503,32 @@ export default function AdminOrderDetail() {
           </Card>
         </div>
 
-        {/* Provider Diagnostics */}
+        {/* Pipeline Diagnostics */}
         <Card className="rounded-3xl shadow-sm border-0 bg-card overflow-hidden">
           <div className="bg-muted/30 px-6 py-4 border-b flex items-center gap-2">
             <Activity className="w-5 h-5 text-muted-foreground" />
-            <h2 className="font-semibold">Provider Diagnostics</h2>
+            <h2 className="font-semibold">Pipeline Diagnostics</h2>
           </div>
           <CardContent className="p-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8">
+              <DetailRow
+                label="Paid"
+                value={<YesNo value={order.paymentStatus === "paid"} />}
+              />
+              <DetailRow
+                label="Webhook Received"
+                value={<YesNo value={order.webhookReceived} />}
+              />
               <DetailRow
                 label="Provider Called"
                 value={<YesNo value={order.providerCalled} />}
               />
               <DetailRow
-                label="HTTP Status"
+                label="Email Sent"
+                value={<YesNo value={order.emailSent} />}
+              />
+              <DetailRow
+                label="Provider HTTP Status"
                 value={
                   order.providerHttpStatus != null ? (
                     <span

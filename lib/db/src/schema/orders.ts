@@ -29,6 +29,8 @@ export const ordersTable = pgTable("orders", {
   findMyStatus: text("find_my_status"),
   providerCoverageNotes: text("provider_coverage_notes"),
   rawProviderResponseEncrypted: text("raw_provider_response_encrypted"),
+  webhookReceived: boolean("webhook_received").notNull().default(false),
+  emailSent: boolean("email_sent").notNull().default(false),
   providerCalled: boolean("provider_called").notNull().default(false),
   providerHttpStatus: integer("provider_http_status"),
   providerResponseReceived: boolean("provider_response_received").notNull().default(false),

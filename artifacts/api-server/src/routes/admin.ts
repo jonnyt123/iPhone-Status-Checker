@@ -164,6 +164,8 @@ router.get("/admin/orders/:orderId", async (req, res): Promise<void> => {
     brand: order.brand,
     model: order.model,
     manufacturer: order.manufacturer,
+    webhookReceived: order.webhookReceived,
+    emailSent: order.emailSent,
     providerCalled: order.providerCalled,
     providerHttpStatus: order.providerHttpStatus,
     providerResponseReceived: order.providerResponseReceived,

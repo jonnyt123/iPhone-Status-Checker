@@ -279,6 +279,8 @@ export type AdminOrderDetail = AdminOrderSummary & {
   model?: string | null;
   manufacturer?: string | null;
   checkedAt?: string | null;
+  webhookReceived?: boolean;
+  emailSent?: boolean;
   providerCalled?: boolean;
   providerHttpStatus?: number | null;
   providerResponseReceived?: boolean;

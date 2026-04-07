@@ -208,6 +208,8 @@ export const GetAdminOrderResponse = zod
       model: zod.string().nullish(),
       manufacturer: zod.string().nullish(),
       checkedAt: zod.coerce.date().nullish(),
+      webhookReceived: zod.boolean().optional(),
+      emailSent: zod.boolean().optional(),
       providerCalled: zod.boolean().optional(),
       providerHttpStatus: zod.number().nullish(),
       providerResponseReceived: zod.boolean().optional(),
