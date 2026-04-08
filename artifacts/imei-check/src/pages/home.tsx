@@ -79,12 +79,7 @@ export default function Home() {
                     Pending
                   </span>
                 </div>
-                <div className="flex justify-between items-center bg-background rounded-2xl p-4 border">
-                  <span className="text-sm font-medium text-muted-foreground">Find My</span>
-                  <span className="bg-muted text-muted-foreground px-3 py-1 rounded-full text-xs font-semibold">
-                    Pending
-                  </span>
-                </div>
+
               </div>
               <p className="text-xs text-muted-foreground text-center mt-4">Results shown on-screen and emailed to you after payment</p>
             </div>
