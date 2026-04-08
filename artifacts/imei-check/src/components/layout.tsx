@@ -33,7 +33,7 @@ export function Layout({ children }: { children: ReactNode }) {
           <div className="md:hidden">
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-full">
+                <Button variant="ghost" size="icon" className="rounded-full border-t-[3px] border-r-[3px] border-b-[3px] border-l-[3px]">
                   <Menu className="w-5 h-5" />
                 </Button>
               </SheetTrigger>
