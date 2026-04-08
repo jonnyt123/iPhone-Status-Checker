@@ -38,13 +38,13 @@ export default function Order() {
               },
               onError: () => {
                 toast({ title: "Checkout Error", description: "Failed to initialize payment session.", variant: "destructive" });
-              }
+              },
             }
           );
         },
         onError: () => {
           toast({ title: "Order Error", description: "Failed to create order. Please try again.", variant: "destructive" });
-        }
+        },
       }
     );
   };
@@ -54,12 +54,14 @@ export default function Order() {
   return (
     <Layout>
       <div className="max-w-md mx-auto py-12 px-4">
-        
+
         {/* Progress Indicator */}
         <div className="mb-10 flex items-center justify-between relative px-2">
           <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-border rounded-full -z-10" />
-          <div className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-primary rounded-full -z-10 transition-all duration-500" style={{ width: `${((step - 1) / 2) * 100}%` }} />
-          
+          <div
+            className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-primary rounded-full -z-10 transition-all duration-500"
+            style={{ width: `${((step - 1) / 2) * 100}%` }}
+          />
           {[1, 2, 3].map((i) => (
             <div
               key={i}
@@ -76,22 +78,22 @@ export default function Order() {
           <div className="bg-muted/30 px-8 py-6 border-b">
             <h2 className="text-2xl font-bold text-center tracking-tight">
               {step === 1 && "Where should we send it?"}
-              {step === 2 && "What's the device ID?"}
+              {step === 2 && "What's the IMEI?"}
               {step === 3 && "Confirm & Pay"}
             </h2>
           </div>
-          
+
           <CardContent className="p-8">
             <AnimatePresence mode="wait">
               {step === 1 && (
-                <motion.form 
+                <motion.form
                   key="step1"
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ duration: 0.3 }}
-                  id="step1-form" 
-                  onSubmit={handleNext} 
+                  id="step1-form"
+                  onSubmit={handleNext}
                   className="space-y-6"
                 >
                   <div className="space-y-3">
@@ -115,14 +117,14 @@ export default function Order() {
               )}
 
               {step === 2 && (
-                <motion.form 
+                <motion.form
                   key="step2"
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ duration: 0.3 }}
-                  id="step2-form" 
-                  onSubmit={handleNext} 
+                  id="step2-form"
+                  onSubmit={handleNext}
                   className="space-y-6"
                 >
                   <div className="space-y-3">
@@ -139,7 +141,7 @@ export default function Order() {
                       autoFocus
                     />
                     <div className="bg-muted p-4 rounded-2xl text-sm text-muted-foreground">
-                      <p className="font-medium text-foreground mb-1">How to find it:</p>
+                      <p className="font-medium text-foreground mb-1">How to find your IMEI:</p>
                       <ul className="list-disc pl-4 space-y-1">
                         <li>Settings → General → About</li>
                         <li>Dial <span className="font-mono text-foreground font-medium">*#06#</span> on the phone</li>
@@ -150,38 +152,48 @@ export default function Order() {
               )}
 
               {step === 3 && (
-                <motion.div 
+                <motion.div
                   key="step3"
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.3 }}
-                  className="space-y-8"
+                  className="space-y-6"
                 >
-                  <div className="flex flex-col items-center justify-center py-4 border-b border-border border-dashed">
-                    <span className="text-sm font-medium text-muted-foreground mb-1">Total Due</span>
-                    <span className="text-5xl font-bold tracking-tighter">$0.99 <span className="text-xl font-medium text-muted-foreground">CAD</span></span>
+                  {/* Order summary */}
+                  <div className="bg-background border rounded-2xl p-5 space-y-3 shadow-sm">
+                    <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground mb-3">Order Summary</h3>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Blacklist Check</span>
+                      <span className="font-semibold">$0.99 CAD</span>
+                    </div>
+                    <div className="flex justify-between text-sm border-t pt-3">
+                      <span className="text-muted-foreground">GST/HST</span>
+                      <span className="text-muted-foreground italic">Calculated at checkout</span>
+                    </div>
+                    <div className="flex justify-between text-base font-bold border-t pt-3">
+                      <span>Total</span>
+                      <span>$0.99 + tax</span>
+                    </div>
                   </div>
 
-                  <div className="bg-background border rounded-2xl p-5 space-y-4 shadow-sm">
+                  <div className="bg-background border rounded-2xl p-5 space-y-3 shadow-sm">
                     <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">Included</h3>
-                    <ul className="space-y-3 text-sm">
-                      <li className="flex items-center gap-3 font-medium"><CheckCircle2 className="w-5 h-5 text-success" /> On-screen results page</li>
-                      <li className="flex items-center gap-3 font-medium"><CheckCircle2 className="w-5 h-5 text-success" /> Email copy of results</li>
-                      <li className="flex items-center gap-3 font-medium"><CheckCircle2 className="w-5 h-5 text-success" /> Blacklist Check</li>
+                    <ul className="space-y-2 text-sm">
+                      <li className="flex items-center gap-3 font-medium"><CheckCircle2 className="w-5 h-5 text-success shrink-0" /> Blacklist status check</li>
+                      <li className="flex items-center gap-3 font-medium"><CheckCircle2 className="w-5 h-5 text-success shrink-0" /> On-screen results page</li>
+                      <li className="flex items-center gap-3 font-medium"><CheckCircle2 className="w-5 h-5 text-success shrink-0" /> Email copy of results</li>
                     </ul>
                   </div>
 
                   <div className="bg-primary/5 border border-primary/20 rounded-2xl p-4 text-sm text-muted-foreground space-y-1">
                     <p className="font-semibold text-foreground">What happens next?</p>
-                    <p>After payment, your device check will be processed and your results will be shown on a receipt-style results page.</p>
-                    <p>A copy of your results will also be emailed to you.</p>
+                    <p>After payment, your blacklist check will be processed and your results will appear on a receipt-style results page. A copy will also be emailed to you.</p>
                   </div>
 
                   <div className="space-y-3 text-xs text-muted-foreground bg-muted p-4 rounded-2xl">
                     <div className="flex gap-2"><ShieldCheck className="w-4 h-4 shrink-0 text-foreground" /><span data-testid="text-order-notice-auth">Authorized data sources only.</span></div>
-                    <div className="flex gap-2"><AlertCircle className="w-4 h-4 shrink-0 text-foreground" /><span data-testid="text-order-notice-coverage">Coverage depends on provider and region.</span></div>
-                    <div className="flex gap-2"><AlertCircle className="w-4 h-4 shrink-0 text-foreground" /><span data-testid="text-order-notice-unavail">Some checks may be unavailable.</span></div>
-                    <div className="flex gap-2"><CheckCircle2 className="w-4 h-4 shrink-0 text-foreground" /><span data-testid="text-order-notice-apple">Apple statuses are not inferred.</span></div>
+                    <div className="flex gap-2"><AlertCircle className="w-4 h-4 shrink-0 text-foreground" /><span data-testid="text-order-notice-coverage">Blacklist coverage depends on provider and region.</span></div>
+                    <div className="flex gap-2"><AlertCircle className="w-4 h-4 shrink-0 text-foreground" /><span data-testid="text-order-notice-unavail">Unavailable fields are not inferred or guessed.</span></div>
                   </div>
                 </motion.div>
               )}
@@ -189,22 +201,22 @@ export default function Order() {
 
             <div className="mt-8 flex gap-3 pt-6 border-t">
               {step > 1 && (
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   size="lg"
-                  className="rounded-2xl h-14 px-4 w-14 p-0 shrink-0 border-2" 
-                  onClick={() => setStep(step - 1)} 
-                  disabled={isPending} 
+                  className="rounded-2xl h-14 px-4 w-14 p-0 shrink-0 border-2"
+                  onClick={() => setStep(step - 1)}
+                  disabled={isPending}
                   data-testid="button-order-back"
                 >
                   <ArrowLeft className="w-5 h-5" />
                 </Button>
               )}
-              
+
               {step < 3 ? (
-                <Button 
-                  form={`step${step}-form`} 
-                  type="submit" 
+                <Button
+                  form={`step${step}-form`}
+                  type="submit"
                   size="lg"
                   className="rounded-2xl h-14 flex-1 text-base font-semibold shadow-md hover:shadow-lg transition-all"
                   data-testid="button-order-next"
@@ -212,14 +224,14 @@ export default function Order() {
                   Continue <ChevronRight className="w-5 h-5 ml-1" />
                 </Button>
               ) : (
-                <Button 
-                  onClick={handlePay} 
-                  disabled={isPending} 
-                  size="lg" 
+                <Button
+                  onClick={handlePay}
+                  disabled={isPending}
+                  size="lg"
                   className="rounded-2xl h-14 flex-1 text-base font-semibold shadow-md hover:shadow-lg transition-all"
                   data-testid="button-order-pay"
                 >
-                  {isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : "Pay Securely"}
+                  {isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : "Pay Securely via Stripe"}
                 </Button>
               )}
             </div>

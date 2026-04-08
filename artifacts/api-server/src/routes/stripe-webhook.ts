@@ -168,8 +168,6 @@ async function processWebhookEvent(event: Stripe.Event): Promise<void> {
           model: result.model,
           manufacturer: result.manufacturer,
           blacklistStatus: result.blacklistStatus,
-          activationLockStatus: result.activationLockStatus,
-          findMyStatus: result.findMyStatus,
           providerCoverageNotes: result.providerCoverageNotes,
         });
 

@@ -16,6 +16,9 @@ import Contact from "@/pages/contact";
 import AdminLogin from "@/pages/admin/login";
 import AdminDashboard from "@/pages/admin/dashboard";
 import AdminOrderDetail from "@/pages/admin/order-detail";
+import IphoneBlacklistCheck from "@/pages/seo/iphone-blacklist-check";
+import ImeiBlacklistCheck from "@/pages/seo/imei-blacklist-check";
+import CheckIfIphoneIsBlacklisted from "@/pages/seo/check-if-iphone-is-blacklisted";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +35,10 @@ function Router() {
       <Route path="/refunds" component={Refunds} />
       <Route path="/contact" component={Contact} />
       
+      <Route path="/iphone-blacklist-check" component={IphoneBlacklistCheck} />
+      <Route path="/imei-blacklist-check" component={ImeiBlacklistCheck} />
+      <Route path="/check-if-iphone-is-blacklisted" component={CheckIfIphoneIsBlacklisted} />
+
       <Route path="/admin" component={AdminLogin} />
       <Route path="/admin/dashboard" component={AdminDashboard} />
       <Route path="/admin/orders/:orderId" component={AdminOrderDetail} />

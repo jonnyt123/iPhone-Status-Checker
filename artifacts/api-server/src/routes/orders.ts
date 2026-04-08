@@ -189,8 +189,8 @@ router.post("/orders/:orderId/checkout", async (req, res): Promise<void> => {
           price_data: {
             currency: "cad",
             product_data: {
-              name: "Trusted IMEI Check",
-              description: `Device status check for ${order.identifierMasked}`,
+              name: "iPhone Check — IMEI Blacklist Check",
+              description: `IMEI blacklist check for ${order.identifierMasked}`,
             },
             unit_amount: AMOUNT_CAD_CENTS,
           },

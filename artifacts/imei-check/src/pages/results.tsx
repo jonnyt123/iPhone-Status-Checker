@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import {
   ShieldCheck, AlertCircle, CheckCircle2, Loader2, Smartphone,
   FileText, Activity, Server, Hash, Check, X, Minus, Info,
-  Mail, CreditCard, Circle, Lock, ArrowRight,
+  Mail, CreditCard, Circle, ArrowRight,
 } from "lucide-react";
 
 const PROCESSING_STEPS = [
@@ -376,20 +376,6 @@ export default function Results() {
                 type="blacklist"
                 icon={ShieldCheck}
                 testId="text-results-blacklist"
-              />
-              <StatusRow
-                label="Activation Lock"
-                status={results.activationLockStatus}
-                type="activation"
-                icon={Lock}
-                testId="text-results-activation"
-              />
-              <StatusRow
-                label="Find My Status"
-                status={results.findMyStatus}
-                type="activation"
-                icon={Smartphone}
-                testId="text-results-findmy"
               />
             </div>
           </CardContent>

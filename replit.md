@@ -1,8 +1,8 @@
-# Trusted IMEI Check
+# iPhone Check
 
 ## Overview
 
-A production-ready paid web service where customers enter their email + IMEI number, pay $0.99 CAD via Stripe, and receive available device-check results on-screen and by email (via Resend).
+A production-ready paid web service where customers enter their email + IMEI number, pay $0.99 CAD plus applicable GST/HST via Stripe, and receive their iPhone blacklist check results on-screen and by email (via Resend). Blacklist-check only — no Activation Lock or Find My checks.
 
 ## Stack
 

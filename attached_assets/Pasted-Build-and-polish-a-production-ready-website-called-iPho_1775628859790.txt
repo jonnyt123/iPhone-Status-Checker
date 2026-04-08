@@ -1,0 +1,388 @@
+Build and polish a production-ready website called “iPhone Check” for BLACKLIST CHECKS ONLY.
+
+This is a blacklist-only iPhone IMEI check service. Do not offer or advertise Activation Lock, Find My, or iCloud lock checks anywhere in the customer-facing product. Do not use fake sample device results in production UI. Do not change environment variable names, secrets, webhook routes, Stripe connection logic, provider connection logic, or deployment setup unless absolutely required to preserve the existing working integration.
+
+CORE PRODUCT
+- The website sells one service only:
+  - Blacklist Check
+- Price:
+  - Base price: $0.99 CAD
+  - Tax: applicable Canadian GST/HST based on the customer’s province/location
+  - Show tax clearly before checkout
+  - Charge the correct total at checkout
+- Delivery:
+  - Show results on-screen on a receipt-style results page
+  - Email a copy of the results to the customer
+- Inputs:
+  - Collect email first
+  - Then collect IMEI
+  - Accept serial number only if the configured provider supports it
+- Data policy:
+  - Show only real provider-returned data
+  - If a field is missing, show “Unavailable from provider”
+  - Never infer unsupported statuses
+  - Never show fake live sample data
+
+IMPORTANT NON-BREAKING CONSTRAINTS
+- Do NOT modify API key secret names
+- Do NOT rename or remove environment variables
+- Do NOT break Stripe integration
+- Do NOT change webhook route names unless already broken and absolutely required
+- Do NOT change published deployment configuration
+- Do NOT remove existing provider integration
+- Preserve the existing working payment/backend setup as much as possible
+- Focus changes on product clarity, results UX, blacklist-only logic, SEO, and frontend polish
+
+DESIGN DIRECTION
+- Apple-inspired Premium UI
+- Premium, minimal, elegant, high-trust
+- Inspired by modern Apple-style product pages and iOS UI language, but not a direct copy
+- No Apple logos, no App Store clone, no trademark misuse
+- White primary background
+- Very light gray secondary surfaces
+- Near-black text with muted gray secondary text
+- Soft blue accent for primary buttons and highlights
+- Elegant green for positive statuses
+- Neutral gray for unavailable statuses
+- Soft red for blacklisted/error states
+- Large rounded corners, subtle borders, soft shadows
+- Smooth, refined transitions and micro-interactions
+- Mobile-first and especially polished on iPhone-sized screens
+
+BRANDING
+- Site/product name: iPhone Check
+- Hero headline:
+  - Fast iPhone IMEI Check
+- Hero subheadline:
+  - Pay $0.99 CAD plus applicable GST/HST to receive your device blacklist status on-screen and by email.
+- Primary CTA:
+  - Start Check
+- Secondary CTA:
+  - How It Works
+
+HOMEPAGE
+Build a polished landing page with these sections:
+
+1. Hero section
+- Headline: Fast iPhone IMEI Check
+- Subheadline: Pay $0.99 CAD plus applicable GST/HST to receive your device blacklist status on-screen and by email.
+- Primary button: Start Check
+- Secondary button: How It Works
+- Show a premium preview card, but NOT fake real device data
+- Do NOT show “iPhone 14 Pro Max” or any hardcoded example device result
+- Use a generic preview only, clearly labeled as a preview
+
+2. Homepage preview card
+Use a generic receipt preview card with:
+- Title: Device Check Receipt
+- Badge: Preview
+- Brand: —
+- Model: —
+- Blacklist Status: Pending
+- Identifier: —
+- Amount: —
+This is preview-only UI. It must not look like a real returned customer result.
+
+3. How it works section
+Use 3 or 4 polished icon cards:
+- Enter your email
+- Enter your IMEI
+- Pay securely
+- View and receive your blacklist result
+
+4. Pricing section
+Show a clear breakdown:
+- Blacklist Check: $0.99 CAD + applicable GST/HST
+- Tax is calculated based on customer province/location
+- Display final total before payment
+
+5. Trust/disclaimer section
+Show:
+- We return results only from authorized data sources.
+- Blacklist coverage depends on the provider and region.
+- Some checks may be unavailable depending on provider support.
+
+6. FAQ section
+Include:
+- What do I get with my check?
+- How do I receive my results?
+- What if a result is unavailable?
+- What does blacklist coverage depend on?
+
+7. Footer
+Include:
+- Terms
+- Privacy
+- Refunds
+- Support / Contact
+
+ORDER FLOW
+Build a premium 3-step flow:
+1. Email
+2. Device ID
+3. Payment
+
+Order page requirements:
+- Ask for email first
+- Then IMEI input
+- Show one selected service only:
+  - Blacklist Check
+- Show order summary with tax:
+  - Blacklist Check ........ $0.99 CAD
+  - Applicable GST/HST ..... calculated based on location
+  - Total .................. calculated total
+- Keep the form premium, spacious, and clean
+- Use progress indicators
+- Explain clearly:
+  - After payment, your blacklist-check results will be shown on a receipt-style results page and a copy will also be emailed to you.
+
+PRICING / TAX
+- Base service price is $0.99 CAD
+- Apply Canadian GST/HST based on the customer’s province/location
+- Do not hardcode Ontario 13% for everyone
+- Use customer billing address / Stripe tax location data where appropriate
+- Show subtotal, tax, and total everywhere:
+  - order summary
+  - Stripe checkout if supported
+  - results receipt
+  - email receipt
+
+PAYMENT
+Preserve the existing Stripe setup if it is already working.
+Use immediate payment flow for a one-time purchase.
+Do not use invoice-style send_invoice customer flow for normal blacklist orders.
+Standard flow should be:
+- customer submits order
+- customer pays
+- payment is confirmed
+- blacklist provider lookup runs
+- results page displays result
+- email copy is sent
+
+RESULTS PAGE
+Create or complete a real dedicated post-payment results page route, tied to the actual paid order.
+
+Requirements:
+- After successful payment, redirect user to a real results page
+- Results page must be dynamic and bound to the actual order record
+- Do not leave the user on a generic success page only
+- The results page must support states:
+  1. Payment confirmed
+  2. Running blacklist check
+  3. Preparing your receipt
+  4. Complete
+  5. Failed / unavailable
+
+When complete, show a premium receipt-style layout:
+- Title: Device Check Receipt
+- Status badge: Paid / Complete
+- Supporting line:
+  - Your blacklist-check results are shown below and have also been emailed to you.
+- Metadata:
+  - Order ID
+  - Date/time checked
+  - Provider name
+  - Identifier type
+  - Masked identifier
+  - Subtotal
+  - Tax
+  - Total Paid
+- Result rows:
+  - Blacklist Status
+  - Brand
+  - Model
+  - Manufacturer
+- Provider coverage notes
+- Disclaimer:
+  - Blacklist coverage depends on the provider and region.
+  - Unavailable fields were not inferred.
+- Support email
+- Button:
+  - Start Another Check
+
+If check is still processing:
+- show a premium loading/progress state
+- poll or refresh until the result is ready
+
+If provider data is missing:
+- show “Unavailable from provider”
+
+Do NOT show:
+- Activation Lock Status
+- Find My Status
+- any unsupported Apple-specific statuses
+
+EMAIL DELIVERY
+Preserve the working email provider integration.
+After confirmed payment and provider response:
+- send results email to the order email address
+- email subject:
+  - Your device check results
+- email body must include:
+  - order ID
+  - date/time
+  - masked identifier
+  - provider name
+  - blacklist status
+  - brand/model/manufacturer if available
+  - subtotal
+  - tax
+  - total paid
+  - provider coverage note
+  - support contact
+
+If email fails:
+- results page should still show the result
+- show:
+  - Your results are shown below. We were unable to send the email copy.
+
+PROVIDER LOGIC
+Preserve the existing provider integration structure.
+Blacklist checks only.
+Requirements:
+- Run the actual provider lookup for blacklist-related data
+- Use the exact IMEI entered by the user
+- Store provider response
+- Normalize and map real returned fields
+- If blacklist status not returned, show “Unavailable from provider”
+- Never fabricate results
+- Keep provider logging and admin visibility
+
+ADMIN / DEBUG
+Add or preserve a clean admin view with:
+- order ID
+- customer email
+- payment status
+- check status
+- provider called yes/no
+- provider HTTP status if available
+- provider response received yes/no
+- email sent yes/no
+- order timeline:
+  - order created
+  - payment confirmed
+  - provider called
+  - provider response saved
+  - email sent
+
+Do not expose full IMEI in plain text in production admin UI.
+
+COPY CLEANUP
+Remove all customer-facing mentions of:
+- Activation Lock
+- Find My
+- iCloud lock
+- multiple product choices
+- $1.98 totals
+- fake device examples like iPhone 14 Pro Max
+- wording that says results are only emailed
+
+Use customer-facing copy that reflects blacklist-only service.
+
+Use:
+- Headline: Fast iPhone IMEI Check
+- Subheadline: Pay $0.99 CAD plus applicable GST/HST to receive your device blacklist status on-screen and by email.
+
+FAQ copy:
+Question: What do I get with my check?
+Answer: You receive the available blacklist status for your device, along with basic device details returned by the configured provider.
+
+Question: How do I receive my results?
+Answer: After payment is confirmed, your blacklist-check results are shown on a receipt-style results page and a copy is also sent to your email address.
+
+Question: What if a result is unavailable?
+Answer: If the configured provider does not return a blacklist result for the device, the result will be marked as unavailable from provider.
+
+SEO
+Add SEO improvements only. Do not break backend/payment logic.
+
+Target keywords:
+- iPhone blacklist check
+- IMEI blacklist check
+- iPhone IMEI check
+- check if iPhone is blacklisted
+- blacklist status check
+- Apple device blacklist check
+
+Homepage SEO:
+- Title: iPhone Blacklist Check | Fast IMEI Check
+- Meta description: Check your iPhone blacklist status online. Fast IMEI blacklist check with results shown on-screen and emailed after payment.
+
+Create indexable pages with unique content for:
+- /iphone-blacklist-check
+- /imei-blacklist-check
+- /check-if-iphone-is-blacklisted
+
+Each SEO page should include:
+- unique title tag
+- unique meta description
+- unique H1
+- useful original explanatory content
+- FAQ
+- CTA to start a check
+
+Technical SEO:
+- sitemap.xml
+- robots.txt
+- canonical tags
+- structured data where appropriate:
+  - FAQPage
+  - Organization
+  - WebSite
+- image alt text
+- mobile performance optimization
+- keep pages crawlable and indexable worldwide
+
+Do not target keywords for services the site does not provide.
+Do not stuff keywords unnaturally.
+
+LEGAL / TRUST
+Keep pages for:
+- Terms
+- Privacy
+- Refunds
+- Contact / Support
+
+Include customer-facing notices:
+- We return results only from authorized data sources.
+- Blacklist coverage depends on the provider and region.
+- Some checks may be unavailable depending on provider support.
+
+Do not include Apple-status disclaimers about Activation Lock or Find My anymore since this is blacklist-only service.
+
+TECHNICAL SAFETY RULES
+- Do not change secrets or secret names
+- Do not rename:
+  - STRIPE_SECRET_KEY
+  - STRIPE_PUBLISHABLE_KEY
+  - STRIPE_WEBHOOK_SECRET
+  - STRIPE_PRICE_ID
+  - DATABASE_URL
+  - RESEND_API_KEY
+  - IMEIAPI_KEY
+  - APP_BASE_URL
+  - or other existing environment variables
+- Do not break the existing published site setup
+- Do not change webhook URLs unless needed to preserve current working logic
+- Do not replace working payment infrastructure
+- Keep changes isolated to:
+  - blacklist-only product simplification
+  - results-page completion
+  - receipt UI
+  - copy cleanup
+  - SEO
+  - UX polish
+
+FINAL QA REQUIREMENTS
+Before considering the update complete, verify:
+- homepage loads correctly
+- no fake device results appear on homepage
+- order flow is blacklist-only
+- pricing/tax display is correct
+- payment flow still works
+- results page exists and is reachable after payment
+- results page shows real order-bound data only
+- email copy still sends
+- no customer-facing Activation Lock or Find My references remain
+- SEO metadata and pages are present
+- Apple-inspired Premium UI is preserved
