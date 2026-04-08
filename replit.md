@@ -2,7 +2,7 @@
 
 ## Overview
 
-A production-ready paid web service where customers enter their email + IMEI number, pay $0.99 CAD via Stripe, and receive available device-check results by email (via Resend).
+A production-ready paid web service where customers enter their email + IMEI number, pay $0.99 CAD via Stripe, and receive available device-check results on-screen and by email (via Resend).
 
 ## Stack
 

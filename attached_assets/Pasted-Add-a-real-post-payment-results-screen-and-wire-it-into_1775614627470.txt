@@ -1,0 +1,130 @@
+Add a real post-payment results screen and wire it into the existing flow.
+
+Problem:
+The app currently completes payment, but there is no proper results screen shown after a successful payment. Users need a dedicated page that displays the live results for their specific order after payment succeeds.
+
+Goal:
+After a successful payment, the user should be sent to a results page that:
+- shows payment confirmation
+- shows processing states while the provider check is running
+- displays the final receipt-style results for that paid order
+- also confirms that a copy was emailed to the customer
+
+Required behavior:
+
+1. Results route
+Create and fully implement a dedicated results page route, such as:
+- /results/[orderId]
+or another clean dynamic route tied to the specific paid order
+
+2. Redirect flow after payment
+After successful payment:
+- redirect the user to the results page for their order
+- do not leave the user on a generic success page with no result details
+- if Stripe Checkout is used, make sure the success URL includes enough information to identify the order and route the user correctly
+
+3. Results page states
+The results page must support these states:
+
+A. Payment confirmed, check not started yet
+Show:
+- Payment confirmed
+- Preparing your device check
+
+B. Check running
+Show:
+- Running device check
+- Contacting provider
+- Preparing your receipt
+
+C. Check complete
+Show the full receipt-style result with real order data
+
+D. Check failed
+Show:
+- Payment received
+- We were unable to complete the device check
+- Please contact support or try again
+Do not show fake result values
+
+4. Receipt-style results UI
+When the check is complete, display a premium receipt-style result card containing:
+- Title: Device Check Receipt
+- Paid/completed status
+- Order ID
+- Date and time checked
+- Provider name
+- Identifier type
+- Masked identifier
+- Amount paid
+- Returned result rows such as:
+  - Blacklist Status
+  - Activation Lock Status
+  - Find My Status
+  - Brand
+  - Model
+  - Manufacturer
+- Provider coverage notes
+- Small disclaimer that unavailable fields were not inferred
+- Support email
+- Button to start another check
+
+5. Real data binding
+The results page must be fully dynamic and bound to the actual order record in the database.
+It must:
+- load the exact paid order
+- load the stored normalized provider response for that order
+- show only real values from that order
+- show “Unavailable from provider” for missing fields
+- never display hardcoded fake example results
+
+6. Processing model
+The results page should poll or refresh while the provider check is still being processed after payment.
+Implement one of these:
+- polling every few seconds until the check is complete
+or
+- server-side refresh/state transition handling
+Once complete, replace the loading state with the real receipt-style result
+
+7. Email confirmation messaging
+When results are complete, show a line near the top:
+- “Your device-check results are shown below and have also been emailed to you.”
+If email sending fails, show:
+- “Your results are shown below. We were unable to send the email copy.”
+
+8. Data model requirements
+Ensure the order record includes enough fields for the results page:
+- orderId
+- paymentStatus
+- checkStatus
+- providerName
+- checkedAt
+- identifierType
+- identifierMasked
+- blacklistStatus
+- activationLockStatus
+- findMyStatus
+- brand
+- model
+- manufacturer
+- providerCoverageNotes
+- emailSent
+- emailError if any
+
+9. Post-payment logic
+After confirmed payment:
+- mark order as paid
+- start provider lookup
+- store normalized results
+- attempt email delivery
+- update order state
+- results page should reflect this exact timeline
+
+10. Keep existing design
+Preserve:
+- Apple-inspired Premium UI
+- receipt-style design
+- payment integration
+- provider integration
+- existing disclaimers
+This update is about completing the missing results-page experience after payment.

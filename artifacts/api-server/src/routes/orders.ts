@@ -199,7 +199,7 @@ router.post("/orders/:orderId/checkout", async (req, res): Promise<void> => {
       ],
       mode: "payment",
       customer_email: order.email,
-      success_url: `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}&order_id=${order.id}`,
+      success_url: `${baseUrl}/results/${order.id}?new=1`,
       cancel_url: `${baseUrl}/cancel?order_id=${order.id}`,
       metadata: { orderId: order.id },
     });
@@ -239,8 +239,18 @@ router.get("/orders/:orderId/results", async (req, res): Promise<void> => {
     return;
   }
 
+  // Return limited data while awaiting payment confirmation (webhook not yet received)
   if (order.paymentStatus !== "paid") {
-    res.status(402).json({ error: "payment_required", message: "Payment required to view results" });
+    res.json({
+      orderId: order.id,
+      identifierType: order.identifierType,
+      identifierMasked: order.identifierMasked,
+      checkStatus: order.checkStatus,
+      paymentStatus: order.paymentStatus,
+      emailSent: order.emailSent,
+      amount: order.amount,
+      currency: order.currency,
+    });
     return;
   }
 
@@ -259,6 +269,9 @@ router.get("/orders/:orderId/results", async (req, res): Promise<void> => {
     providerCoverageNotes: order.providerCoverageNotes,
     checkStatus: order.checkStatus,
     paymentStatus: order.paymentStatus,
+    emailSent: order.emailSent,
+    amount: order.amount,
+    currency: order.currency,
   });
 });
 

@@ -27,4 +27,7 @@ export interface OrderResults {
   providerCoverageNotes?: string | null;
   checkStatus: OrderResultsCheckStatus;
   paymentStatus: OrderResultsPaymentStatus;
+  emailSent?: boolean | null;
+  amount?: number | null;
+  currency?: string | null;
 }

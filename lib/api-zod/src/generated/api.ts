@@ -85,6 +85,9 @@ export const GetOrderResultsResponse = zod.object({
   providerCoverageNotes: zod.string().nullish(),
   checkStatus: zod.enum(["pending", "in_progress", "completed", "failed"]),
   paymentStatus: zod.enum(["pending", "paid", "failed", "refunded"]),
+  emailSent: zod.boolean().nullish(),
+  amount: zod.number().nullish(),
+  currency: zod.string().nullish(),
 });
 
 /**

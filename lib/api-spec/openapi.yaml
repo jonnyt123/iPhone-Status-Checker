@@ -135,12 +135,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/OrderResults"
-        "402":
-          description: Payment required
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiError"
         "404":
           description: Order not found
           content:
@@ -620,6 +614,15 @@ components:
         paymentStatus:
           type: string
           enum: [pending, paid, failed, refunded]
+        emailSent:
+          type: boolean
+          nullable: true
+        amount:
+          type: integer
+          nullable: true
+        currency:
+          type: string
+          nullable: true
       required: [orderId, identifierType, identifierMasked, checkStatus, paymentStatus]
 
     AdminLoginBody:
