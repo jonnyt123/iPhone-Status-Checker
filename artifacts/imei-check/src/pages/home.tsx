@@ -167,7 +167,7 @@ export default function Home() {
             {[
               { icon: Mail, title: "Enter Email", desc: "Where we'll send your results." },
               { icon: Smartphone, title: "Enter IMEI", desc: "Found in Settings or by dialing *#06#." },
-              { icon: CreditCard, title: "Pay $0.99 + Tax", desc: "Secure checkout via Stripe. GST/HST calculated at checkout." },
+              { icon: CreditCard, title: "Make Payment", desc: "Secure checkout via Stripe. GST/HST calculated at checkout." },
               { icon: ChevronRight, title: "Get Results", desc: "Blacklist status shown on-screen and emailed to you." },
             ].map((step, i) => (
               <Card key={i} className="rounded-3xl border-none shadow-md bg-card">
